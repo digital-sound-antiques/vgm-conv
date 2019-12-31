@@ -1,7 +1,9 @@
 # vgm-conv
   Chip-type and clock converter for VGM.
 
-This repository is still experimetal. At present, only YM2612 to YM2413 conversion is available.
+This repository is still experimetal. At present, only YM2612 to YM2413 conversion is available. 
+
+As for PCM conversion, YM2612's register 2A access can be converted to YM2413 DAC. VGM's DAC stream commands are not supported yet.
 
 # Install
 ```sh
