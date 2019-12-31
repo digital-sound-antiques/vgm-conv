@@ -6,6 +6,11 @@
   "bin": {
     "vgm-conv": "bin/cmd.js"
   },
+  "files": [
+    "README.md",
+    "package.json",
+    "dist"
+  ],
   "scripts": {
     "prepare": "npm run clean && npm run build",
     "clean": "rm-cli -ss -r dist",
