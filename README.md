@@ -21,10 +21,11 @@ $ vgm-conv -f ym2612 -t ym2413 -o output.vgm input.vgm
 $ vgm-conv -f ym2612 -t ym2413 -c 4000000 -o output.vgm input.vgm
 ```
 
-## Convert only YM2612 DAC part to YM2413
+## Convert only YM2612 DAC part to YM2413 7.5bit DAC
 ```sh
-$ vgm-conv -f ym2612.dac -t ym2413 -o output.vgm input.vgm
+$ vgm-conv -f ym2612.dac -t ym2413 -D useTestMode=true -o output.vgm input.vgm
 ```
+
 
 # Usage
 ```
