@@ -78,7 +78,7 @@ const sections = [
       {
         def: "{bold -D} decimation={underline n}",
         desc:
-          "Decimate 1 of n of PCM data. 4 or greater value is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default n is 4."
+          "Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default value is 4."
       },
       {
         def: "{bold -D} useTestMode={underline <true|false>}",
