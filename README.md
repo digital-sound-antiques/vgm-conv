@@ -1,5 +1,7 @@
 # vgm-conv
-  Chip-type and clock converter for VGM.
+[![npm version](https://badge.fury.io/js/vgm-conv.svg)](https://badge.fury.io/js/vgm-conv)
+
+Chip-type and clock converter for VGM.
 
 This repository is still experimetal. At present, only YM2612 to YM2413 conversion is available. 
 
