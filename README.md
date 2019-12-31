@@ -57,9 +57,9 @@ AVAILABLE CHIPS
 
 YM2612 to YM2413 OPTIONS
 
-  -D decimation=n               Decimate 1 of n of PCM data. 4 or greater value is recommended if USB       
+  -D decimation=n               Decimate 1 of n of PCM data. 2 to 4 is recommended if USB     
                                 serial device (like SPFM) is used to play VGM. n=0 disables the feature and 
-                                results the best playback quality. The default n is 4.                      
+                                results the best playback quality. The default value is 4.                      
   -D useTestMode=<true|false>   If `true`, YM2413 test mode 7.5bit DAC is used but disables all YM2413 FM   
                                 channels. Otherwise pseudo 6-bit DAC is used. The default value is `false`. 
 
