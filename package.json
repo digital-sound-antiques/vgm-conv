@@ -1,0 +1,34 @@
+{
+  "name": "vgm-conv",
+  "version": "0.1.0",
+  "description": "Chip-type and clock converter for VGM.",
+  "main": "dist/index.js",
+  "bin": {
+    "vgm-conv": "bin/cmd.js"
+  },
+  "scripts": {
+    "prepare": "npm run clean && npm run build",
+    "clean": "rm-cli -ss -r dist",
+    "build": "tsc",
+    "typedoc": "typedoc"
+  },
+  "author": "Mitsutaka Okazaki",
+  "license": "ISC",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.1.0",
+    "vgm-parser": "^0.6.2"
+  },
+  "devDependencies": {
+    "@types/command-line-usage": "^5.0.1",
+    "@types/command-line-args": "^5.0.0",
+    "@types/node": "^12.12.12",
+    "prettier": "^1.19.1",
+    "rm-cli": "^1.4.2",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "typescript": "^3.4.5"
+  }
+}
