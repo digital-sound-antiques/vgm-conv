@@ -41,7 +41,7 @@ const optionDefinitions = [
     alias: "o",
     typeLabel: "{underline file}",
     description:
-      "Output VGM file. The standard output is used if not speicified. If the given file is .vgz, the output will be compressed.",
+      "Output VGM file. The standard output is used if not speicified. If the given file is *.vgz, the output will be compressed.",
     type: String
   },
   {
