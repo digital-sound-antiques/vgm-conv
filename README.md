@@ -49,7 +49,9 @@ OPTIONS
   -c, --clock clock         Specify clock in Hz of destination chip. The typical clock value will be      
                             applied if not specified.                                                     
   -D, --define name=value   Define converter option variable. See below.                                  
-  -o, --output file         Output VGM file. The standard output is used if not speicified.               
+  -o, --output file         Output VGM file. The standard output is used if not speicified. If the given  
+                            file is *.vgz, the output will be compressed.                                  
+  --no-gd3                  Remove GD3 tag from output.              
   -h, --help                Show this help.                                                               
 
 AVAILABLE CHIPS
