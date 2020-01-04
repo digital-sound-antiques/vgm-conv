@@ -40,8 +40,14 @@ const optionDefinitions = [
     name: "output",
     alias: "o",
     typeLabel: "{underline file}",
-    description: "Output VGM file. The standard output is used if not speicified.",
+    description:
+      "Output VGM file. The standard output is used if not speicified. If the given file is .vgz, the output will be compressed.",
     type: String
+  },
+  {
+    name: "no-gd3",
+    description: "Remove GD3 tag from output.",
+    type: Boolean
   },
   {
     name: "help",
@@ -81,7 +87,7 @@ const sections = [
           "Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default value is 4."
       },
       {
-        def: "{bold -D} useTestMode={underline <true|false>}",
+        def: "{bold -D} useTestMode={underline true|false}",
         desc:
           "If `true`, YM2413 test mode 7.5bit DAC is used but disables all YM2413 FM channels. Otherwise pseudo 6-bit DAC is used. The default value is `false`."
       }
@@ -206,9 +212,16 @@ function main(argv: string[]) {
 
   try {
     const converted = convertVGM(vgm, from, to, opts);
+    if (options["no-gd3"]) {
+      converted.gd3tag = undefined;
+    }
     const res = Buffer.from(converted.build());
     if (output) {
-      fs.writeFileSync(output, res);
+      if (/\.vgz/i.test(output)) {
+        fs.writeFileSync(output, zlib.gzipSync(res));
+      } else {
+        fs.writeFileSync(output, res);
+      }
     } else {
       process.stdout.write(res);
     }

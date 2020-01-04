@@ -36,6 +36,7 @@ export class YM2612ToYM2413Converter extends VGMConverter {
   _keyFlags = [0, 0, 0, 0, 0, 0];
   _goalClock: number;
   _useTestMode: boolean;
+  _rootCH = 0;
   _decimation: number;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
@@ -135,15 +136,18 @@ export class YM2612ToYM2413Converter extends VGMConverter {
       res.push(this._y(6, 0x0f));
       res.push(this._y(7, 0x0f));
 
-      res.push(this._y(48, 0));
-      res.push(this._y(49, 0));
-      res.push(this._y(50, 0));
+      this._rootCH = 6;
 
-      res.push(this._y(32, 0x1e));
-      res.push(this._y(33, 0x1e));
-      res.push(this._y(34, 0x1e));
+      res.push(this._y(48 + this._rootCH, 0));
+      res.push(this._y(49 + this._rootCH, 0));
+      res.push(this._y(50 + this._rootCH, 0));
+
+      res.push(this._y(32 + this._rootCH, 0x1e));
+      res.push(this._y(33 + this._rootCH, 0x1e));
+      res.push(this._y(34 + this._rootCH, 0x1e));
     } else {
       // make sure all channels key-off
+      res.push(this._y(37, 0));
       res.push(this._y(38, 0));
       res.push(this._y(39, 0));
       res.push(this._y(40, 0));
@@ -201,11 +205,12 @@ export class YM2612ToYM2413Converter extends VGMConverter {
 
     if (this._decimation <= 1 || this._div % this._decimation !== 0) {
       if (this._useTestMode) {
-        const vv = 57 + Math.round((208 * v) / 255);
-        res.push(this._y(16, vv));
-        res.push(this._y(17, vv));
+        const vv = 47 + Math.round((208 * v) / 255);
+        res.push(this._y(16 + this._rootCH, vv));
+        res.push(this._y(17 + this._rootCH, vv));
+        res.push(this._y(18 + this._rootCH, vv));
       } else {
-        const idx = (v * 3) & 0x3f8;
+        const idx = Math.min(768, v * 4) & 0x3f8;
         const vs = YM2413DACTable[idx];
         for (let i = 0; i < 3; i++) {
           res.push(this._y(56 - i, (8 << 4) | vs[i]));

@@ -1,6 +1,6 @@
 {
   "name": "vgm-conv",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Chip-type and clock converter for VGM.",
   "main": "dist/index.js",
   "bin": {
@@ -22,7 +22,7 @@
   "dependencies": {
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
-    "vgm-parser": "^0.6.2"
+    "vgm-parser": "^0.6.3"
   },
   "devDependencies": {
     "@types/command-line-usage": "^5.0.1",
