@@ -1,12 +1,13 @@
 {
   "name": "vgm-conv",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Chip-type and clock converter for VGM.",
   "main": "dist/index.js",
   "bin": {
     "vgm-conv": "bin/cmd.js"
   },
   "files": [
+    "bin",
     "README.md",
     "package.json",
     "dist"
@@ -22,11 +23,11 @@
   "dependencies": {
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
-    "vgm-parser": "^0.6.3"
+    "vgm-parser": "^0.8.3"
   },
   "devDependencies": {
-    "@types/command-line-usage": "^5.0.1",
     "@types/command-line-args": "^5.0.0",
+    "@types/command-line-usage": "^5.0.1",
     "@types/node": "^12.12.12",
     "prettier": "^1.19.1",
     "rm-cli": "^1.4.2",
@@ -34,6 +35,27 @@
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
-    "typescript": "^3.4.5"
+    "typescript": "^3.4.5",
+    "zlibjs": "^0.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digital-sound-antiques/vgm-conv"
+  },
+  "keywords": [
+    "vgm",
+    "chiptune",
+    "ym2413",
+    "ym2612",
+    "ym2203",
+    "ym2608",
+    "ym3812",
+    "ym3526",
+    "y8950",
+    "ymf262",
+    "yay-3-8910"
+  ],
+  "engines": {
+    "node": ">=10.0.0"
   }
 }

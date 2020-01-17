@@ -69,7 +69,7 @@ const emptySlot = createOPNSlotParam();
 
 export function OPLLVoiceToOPNVoice(opll: OPLLVoice): OPNVoice {
   return {
-    fb: opll.slots[0].wf ? Math.min(7, opll.fb * 2) : opll.fb,
+    fb: opll.slots[0].wf ? Math.min(7, opll.fb + 6) : opll.fb,
     con: 2,
     ams: 4, // 5.9dB
     pms: opll.slots[0].pm || opll.slots[1].pm ? 2 : 0, // 6.7cent or 0

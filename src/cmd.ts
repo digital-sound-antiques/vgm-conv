@@ -1,7 +1,6 @@
 import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
 import fs from "fs";
-import zlib from "zlib";
 import convertVGM from "./index";
 import { VGM } from "vgm-parser";
 
@@ -71,11 +70,25 @@ const sections = [
     optionList: optionDefinitions
   },
   {
-    header: "AVAILABLE CHIPS",
+    header: "CLOCK CONVERSION",
     content: [
-      "Currently conversion only YM2612 to YM2413 is supported.",
-      "ym2612, ym2612.fm and ym2612.dac are available for `-f` option.",
-      "ym2413 is available for `-t` option."
+      { chip: "{bold AVAILABLE CHIPS}" },
+      { chip: "sn76489, ym2612" },
+      { chip: "ay8910, ym2203, ym2608" },
+      { chip: "ym3812, ym3526, y8950, ymf262" },
+      { chip: "ym2413" }
+    ]
+  },
+  {
+    header: "CHIP CONVERSION",
+    content: [
+      { from: "{bold FROM}", to: "{bold TO}" },
+      { from: "ay8910", to: "ym2203, ym2608, ym3812, y8950, ym3526, ymf262" },
+      { from: "sn76489", to: "ay8910, ym2203, ym2608, ym2612" },
+      { from: "ym2413", to: "ym2608, ym3812, y8950, ym3526, ymf262" },
+      { from: "ym2612", to: "ym2413" },
+      { from: "ym2612.fm", to: "ym2413" },
+      { from: "ym2612.dac", to: "ym2413" }
     ]
   },
   {
@@ -98,15 +111,19 @@ const sections = [
     content: [
       {
         desc: "YM2612 to YM2413",
-        example: "$ vgm-conv -f ym2612 -t ym2413 -o output.vgm input.vgm"
+        example: "$ vgm-conv -f ym2612 -t ym2413 input.vgm"
+      },
+      {
+        desc: "Both YM2413 and AY8910 to YM2608",
+        example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608 -o output.vgm"
       },
       {
         desc: "Only DAC part of YM2612 to YM2413",
-        example: "$ vgm-conv -f ym2612.dac -t ym2413 -o output.vgm input.vgm"
+        example: "$ vgm-conv -f ym2612.dac -t ym2413 input.vgm"
       },
       {
         desc: "YM2612 to YM2413@4.00MHz",
-        example: "$ vgm-conv -f ym2612 -t ym2413 -c 4000000 -o output.vgm input.vgm"
+        example: "$ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm"
       }
     ]
   }
@@ -116,15 +133,6 @@ const defineKeys = ["decimation", "useTestMode"];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-}
-
-function loadVgmOrVgz(input: string) {
-  const buf = fs.readFileSync(input);
-  try {
-    return zlib.gunzipSync(buf);
-  } catch (e) {
-    return buf;
-  }
 }
 
 function parseValue(text: string): boolean | string | number {
@@ -160,6 +168,18 @@ function parseDefines(defs: Array<string>): {} {
   return res;
 }
 
+const defaultClocks: { [key: string]: number } = {
+  ym2413: 3579545,
+  ym2608: 7987200,
+  ym2612: 7670454,
+  ym2151: 4000000,
+  ym2203: 4000000,
+  ym3812: 3579545,
+  ym8950: 3579545,
+  ym3526: 3579545,
+  ymf262: 14318180
+};
+
 function main(argv: string[]) {
   const options = commandLineArgs(optionDefinitions, { argv });
 
@@ -187,7 +207,7 @@ function main(argv: string[]) {
   const input = options.input || "/dev/stdin";
   const output = options.output;
 
-  const buf = loadVgmOrVgz(input);
+  const buf = fs.readFileSync(input);
   const vgm = VGM.parse(toArrayBuffer(buf));
 
   const fromCM = (options.from || options.to).split(".");
@@ -205,7 +225,7 @@ function main(argv: string[]) {
   const to = {
     index: 0,
     chip: toChipName,
-    clock: options.clock || 0
+    clock: options.clock || defaultClocks[toChipName] || 0
   };
 
   const opts = parseDefines(options.define);
@@ -215,13 +235,10 @@ function main(argv: string[]) {
     if (options["no-gd3"]) {
       converted.gd3tag = undefined;
     }
-    const res = Buffer.from(converted.build());
+    const compress = /\.vgz/i.test(output);
+    const res = Buffer.from(converted.build({ compress }));
     if (output) {
-      if (/\.vgz/i.test(output)) {
-        fs.writeFileSync(output, zlib.gzipSync(res));
-      } else {
-        fs.writeFileSync(output, res);
-      }
+      fs.writeFileSync(output, res);
     } else {
       process.stdout.write(res);
     }

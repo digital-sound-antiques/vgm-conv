@@ -2,7 +2,8 @@ import { VGMConverter, ChipInfo } from "./vgm-converter";
 import {
   VGMCommand,
   VGMWriteDataCommand,
-  VGMWaitCommand,
+  VGMWaitWordCommand,
+  VGMWaitNibbleCommand,
   VGMWrite2ACommand,
   VGMSeekPCMCommand,
   VGMDataBlockCommand
@@ -175,7 +176,7 @@ export class YM2612ToYM2413Converter extends VGMConverter {
       const freq = (fnum * this._goalClock) / 72 / (1 << 19);
       const cycleInSeconds = 1.0 / freq;
       const nnnn = Math.round(44100 * (cycleInSeconds / 4));
-      res.push(new VGMWaitCommand({ cmd: 0x61, nnnn }));
+      res.push(new VGMWaitWordCommand({ count: nnnn }));
 
       // stop phase generator
       res.push(this._y(21, 0));
@@ -218,7 +219,7 @@ export class YM2612ToYM2413Converter extends VGMConverter {
       }
     }
     if (1 <= cmd.count) {
-      res.push(new VGMWaitCommand({ cmd: 0x70 + (cmd.count - 1) }));
+      res.push(new VGMWaitNibbleCommand({ count: cmd.count }));
     }
     this._div++;
     return res;
