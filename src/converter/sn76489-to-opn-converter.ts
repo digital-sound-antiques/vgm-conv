@@ -57,18 +57,30 @@ export class SN76489ToOPNConverter extends VGMConverter {
 
   _makeSQRVoice(ch: number) {
     this._y(0x30 + ch, 0x02); // FM 1_1 DT/MULTI
+    this._y(0x38 + ch, 0x02); // FM 1_2 DT/MULTI
+    this._y(0x34 + ch, 0x02); // FM 1_3 DT/MULTI
     this._y(0x3c + ch, 0x01); // FM 1_4 DT/MULTI
-    this._y(0x40 + ch, 0x18); // FM 1_1 TL
+    this._y(0x40 + ch, 0x1e); // FM 1_1 TL
+    this._y(0x48 + ch, 0x20); // FM 1_2 TL
+    this._y(0x44 + ch, 0x30); // FM 1_3 TL
     this._y(0x4c + ch, 0x7f); // FM 1_4 TL
     this._y(0x50 + ch, 0x1f); // FM 1_1 KS/AR
+    this._y(0x58 + ch, 0x1f); // FM 1_2 KS/AR
+    this._y(0x54 + ch, 0x1f); // FM 1_3 KS/AR
     this._y(0x5c + ch, 0x1f); // FM 1_4 KS/AR
     this._y(0x60 + ch, 0x00); // FM 1_1 AM/DR
+    this._y(0x68 + ch, 0x00); // FM 1_2 AM/DR
+    this._y(0x64 + ch, 0x00); // FM 1_3 AM/DR
     this._y(0x6c + ch, 0x00); // FM 1_4 AM/DR
     this._y(0x70 + ch, 0x00); // FM 1_1 SR
+    this._y(0x78 + ch, 0x00); // FM 1_2 SR
+    this._y(0x74 + ch, 0x00); // FM 1_3 SR
     this._y(0x7c + ch, 0x00); // FM 1_4 SR
     this._y(0x80 + ch, 0x00); // FM 1_1 SL/RR
+    this._y(0x88 + ch, 0x00); // FM 1_2 SL/RR
+    this._y(0x84 + ch, 0x00); // FM 1_3 SL/RR
     this._y(0x8c + ch, 0x0f); // FM 1_4 SL/RR
-    this._y(0xb0 + ch, 0x3d); // FM 1 FB:7/ALG:5
+    this._y(0xb0 + ch, 0x3b); // FM 1 FB:7/ALG:3
     this._y(0xb4 + ch, 0xc0); // FM 1 LR/AMS/PMS
   }
 
@@ -77,9 +89,9 @@ export class SN76489ToOPNConverter extends VGMConverter {
     this._makeSQRVoice(0);
     this._makeSQRVoice(1);
     this._makeSQRVoice(2);
-    this._y(0x28, 0x90); // KEY-ON FM 1
-    this._y(0x28, 0x91); // KEY-ON FM 2
-    this._y(0x28, 0x92); // KEY-ON FM 3
+    this._y(0x28, 0xf0); // KEY-ON FM 1
+    this._y(0x28, 0xf1); // KEY-ON FM 2
+    this._y(0x28, 0xf2); // KEY-ON FM 3
     return this._buf.commit();
   }
 

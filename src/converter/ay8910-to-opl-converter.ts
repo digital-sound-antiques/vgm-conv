@@ -1,4 +1,3 @@
-import { OPLL_VOICES, OPLLVoice, toOPLLVoice } from "./opll-voices";
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
