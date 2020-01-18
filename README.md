@@ -10,8 +10,6 @@ Supported chips are sn76489, ay8910, ym2203, ym2608, ym3812, y8950, ym3526, ymf2
 # Type Conversion
 vgm-conv supports non-trivial conversions across various chip types.
 
-Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited thus don't expect much.
-
 |FROM|TO|
 |-|-|
 |ay8910|ym2203, ym2608, ym3812, y8950, ym3526, ymf262|
@@ -22,6 +20,8 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 |ym2203, ym2203.fm|ym2413|
 |ym2608, ym2608.fm|ym2413|
 |ym2612, ym2612.fm, ym2612,dac|ym2413|
+
+Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited thus don't expect much.
 
 # Install
 ```sh
