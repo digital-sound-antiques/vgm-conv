@@ -46,8 +46,11 @@ $ vgm-conv -f ym2612.dac -t ym2413 -D useTestMode=true -o output.vgm input.vgm
 ```
 
 # Current Limitation
-- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported yet.
-- Dual chip is not supported yet.
+- A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
+- YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
+- SN76489 to AY8910 conversion ignores the noise channel.
+- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
+- Dual chip is not supported.
 
 # Usage
 ```
