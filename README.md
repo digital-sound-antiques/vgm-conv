@@ -23,6 +23,14 @@ vgm-conv supports non-trivial conversions across various chip types.
 
 Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited thus don't expect much.
 
+## Limitation
+- A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
+- YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
+- YM2608 to YM2203 does not support the rhythm part conversion.
+- SN76489 to AY8910 conversion ignores the noise channel.
+- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
+- Dual chip is not supported.
+
 # Install
 ```sh
 $ npm install -g vgm-conv
@@ -53,14 +61,6 @@ $ vgm-conv -f ym2612.dac -t ym2413 -D useTestMode=true -o output.vgm input.vgm
 ```sh
 $ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 -o output.vgm
 ```
-
-# Limitation
-- A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
-- YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
-- YM2608 to YM2203 does not support the rhythm part conversion.
-- SN76489 to AY8910 conversion ignores the noise channel.
-- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
-- Dual chip is not supported.
 
 # Usage
 ```
