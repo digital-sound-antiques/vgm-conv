@@ -5,13 +5,15 @@ import { YM2413ClockConverter } from "./converter/ym2413-clock-converter";
 import { AY8910ClockConverter } from "./converter/ay8910-clock-converter";
 import { YM2203ClockConverter, YM2608ClockConverter, YM2612ClockConverter } from "./converter/opn-clock-converter";
 import { YM2413ToYM2608Converter } from "./converter/ym2413-to-ym2608-converter";
-import { AY8910ToYM2608Converter, AY8910ToYM2203Converter } from "./converter/ay8910-to-opn-converter";
+import { AY8910ToYM2608Converter, AY8910ToYM2203Converter } from "./converter/ay8910-to-ssg-converter";
 import { AY8910ToOPLConverter } from "./converter/ay8910-to-opl-converter";
 import { YM2413ToOPLConverter } from "./converter/ym2413-to-opl-converter";
 import { OPLClockConverter } from "./converter/opl-clock-converter";
 import { SN76489ClockConverter } from "./converter/sn76489-clock-converter";
 import { SN76489ToAY8910Converter } from "./converter/sn76489-to-ay8910-converter";
 import { SN76489ToOPNConverter } from "./converter/sn76489-to-opn-converter";
+import { YM2203ToYM2413Converter, YM2608ToYM2413Converter } from "./converter/opn-to-ym2413-converter";
+import { YM2203ToAY8910Converter, YM2608ToAY8910Converter } from "./converter/ssg-to-ay8910-converter";
 
 export function getClockConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMConverter | null {
   if (to.chip === "ym3812" || to.chip === "y8950" || to.chip === "ym3526" || to.chip === "ymf262") {
@@ -44,6 +46,23 @@ export function getChipConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMCon
       return new YM2612ToYM2413Converter(from, to, opts);
     }
   }
+  if (from.chip === "ym2203") {
+    if (to.chip === "ym2413") {
+      return new YM2203ToYM2413Converter(from, to, opts);
+    }
+    if (to.chip === "ay8910") {
+      return new YM2203ToAY8910Converter(from, to, opts);
+    }
+  }
+  if (from.chip === "ym2608") {
+    if (to.chip === "ym2413") {
+      return new YM2608ToYM2413Converter(from, to, opts);
+    }
+    if (to.chip === "ay8910") {
+      return new YM2608ToAY8910Converter(from, to, opts);
+    }
+  }
+
   if (from.chip === "ym2413") {
     if (to.chip === "ym2608") {
       return new YM2413ToYM2608Converter(from, to, opts);
@@ -128,7 +147,7 @@ export default function convertVGM(input: VGM, from: ChipInfo, to: ChipInfo, opt
           throw new Error(`Clock converter for ${to.chip} is not implemented.`);
         }
       }
-      chipConverter.from = cur;
+      chipConverter.from = { ...from, clock: cur.clock };
       vgm = convert(vgm, chipConverter);
       cur = chipConverter.convertedChipInfo;
     } else {

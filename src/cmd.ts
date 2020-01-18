@@ -86,9 +86,20 @@ const sections = [
       { from: "ay8910", to: "ym2203, ym2608, ym3812, y8950, ym3526, ymf262" },
       { from: "sn76489", to: "ay8910, ym2203, ym2608, ym2612" },
       { from: "ym2413", to: "ym2608, ym3812, y8950, ym3526, ymf262" },
-      { from: "ym2612", to: "ym2413" },
-      { from: "ym2612.fm", to: "ym2413" },
-      { from: "ym2612.dac", to: "ym2413" }
+      { from: "ym2203, ym2203.fm", to: "ym2413" },
+      { from: "ym2608, ym2608.fm", to: "ym2413" },
+      { from: "ym2203, ym2203.ssg", to: "ay8910" },
+      { from: "ym2608, ym2608.ssg", to: "ay8910" },
+      { from: "ym2612, ym2612.fm, ym2612.dac", to: "ym2413" }
+    ]
+  },
+  {
+    header: "YM2203/2608 to YM2413 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} ws={underline sqr|saw|sin}",
+        desc: "Specify wave shape to simulate OPNx voice. Default: `saw`."
+      }
     ]
   },
   {
@@ -118,6 +129,10 @@ const sections = [
         example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608 -o output.vgm"
       },
       {
+        desc: "YM2203's FM part to YM2413 and SSG part to AY8910",
+        example: "$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 -o output.vgm"
+      },
+      {
         desc: "Only DAC part of YM2612 to YM2413",
         example: "$ vgm-conv -f ym2612.dac -t ym2413 input.vgm"
       },
@@ -129,7 +144,7 @@ const sections = [
   }
 ];
 
-const defineKeys = ["decimation", "useTestMode"];
+const defineKeys = ["decimation", "useTestMode", "ws"];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
@@ -228,9 +243,8 @@ function main(argv: string[]) {
     clock: options.clock || defaultClocks[toChipName] || 0
   };
 
-  const opts = parseDefines(options.define);
-
   try {
+    const opts = parseDefines(options.define);
     const converted = convertVGM(vgm, from, to, opts);
     if (options["no-gd3"]) {
       converted.gd3tag = undefined;
@@ -243,7 +257,7 @@ function main(argv: string[]) {
       process.stdout.write(res);
     }
   } catch (e) {
-    throw e;
+    console.error(e.message);
   }
 }
 

@@ -1,15 +1,22 @@
 import { ChipInfo, VGMClockConverter } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand, ChipName } from "vgm-parser";
-import { PSGClockConverterBase } from "./ay8910-clock-converter";
+import { AY8910ClockConverter } from "./ay8910-clock-converter";
 
 export class OPNClockConverterBase extends VGMClockConverter {
   _ratio: number;
   _regs = [new Uint8Array(256), new Uint8Array(256)];
   _target: ChipName;
+  _ssgConverter: AY8910ClockConverter | null = null;
   constructor(target: ChipName, from: ChipInfo, toClock: number, opts: any) {
     super(from, toClock, 3579545);
     this._target = target;
     this._ratio = this.to.clock / from.clock;
+
+    if (this.from.chip === "ym2608" || this.from.chip === "ym2203") {
+      if (this.from.subModule == null || this.from.subModule === "ssg") {
+        this._ssgConverter = new AY8910ClockConverter(from, this.to.clock, opts);
+      }
+    }
   }
 
   convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMWriteDataCommand[] {
@@ -40,8 +47,17 @@ export class OPNClockConverterBase extends VGMClockConverter {
   }
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
+    const convertFM = this.from.subModule == null || this.from.subModule === "fm";
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === this._target && cmd.index === this.from.index) {
-      return this.convertWriteDataCommand(cmd);
+      if (cmd.addr < 0x10) {
+        if (this._ssgConverter) {
+          return this._ssgConverter.convert(cmd);
+        }
+      } else {
+        if (convertFM) {
+          return this.convertWriteDataCommand(cmd);
+        }
+      }
     }
     return [cmd];
   }
@@ -50,7 +66,6 @@ export class OPNClockConverterBase extends VGMClockConverter {
 export class YM2203ClockConverter extends OPNClockConverterBase {
   constructor(from: ChipInfo, toClock: number, opts: any) {
     super("ym2203", from, toClock, 4000000);
-    this.pipeTo(new PSGClockConverterBase("ym2203", from, this.to.clock, opts));
   }
 }
 
@@ -63,6 +78,5 @@ export class YM2612ClockConverter extends OPNClockConverterBase {
 export class YM2608ClockConverter extends OPNClockConverterBase {
   constructor(from: ChipInfo, toClock: number, opts: any) {
     super("ym2608", from, toClock, 7987200);
-    this.pipeTo(new PSGClockConverterBase("ym2608", from, this.to.clock, opts));
   }
 }

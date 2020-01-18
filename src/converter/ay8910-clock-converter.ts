@@ -1,15 +1,13 @@
 import { ChipInfo, VGMClockConverter } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand, ChipName } from "vgm-parser";
 
-export class PSGClockConverterBase extends VGMClockConverter {
+export class AY8910ClockConverter extends VGMClockConverter {
   _ratio: number;
   _regs = new Uint8Array(16);
   _outRegs = new Int16Array(16);
-  _target: ChipName;
 
-  constructor(target: ChipName, from: ChipInfo, toClock: number, opts: any) {
+  constructor(from: ChipInfo, toClock: number, opts: any) {
     super(from, toClock, 3579545 / 2);
-    this._target = target;
     this._ratio = this.to.clock / from.clock;
     for (let i = 0; i < this._outRegs.length; i++) {
       this._outRegs[i] = -1;
@@ -45,15 +43,9 @@ export class PSGClockConverterBase extends VGMClockConverter {
   }
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
-    if (cmd instanceof VGMWriteDataCommand && cmd.chip === this._target && cmd.index === this.from.index) {
+    if (cmd instanceof VGMWriteDataCommand && cmd.chip === this.from.chip && cmd.index === this.from.index) {
       return this.convertWriteDataCommand(cmd);
     }
     return [cmd];
-  }
-}
-
-export class AY8910ClockConverter extends PSGClockConverterBase {
-  constructor(from: ChipInfo, toClock: number, opts: any) {
-    super("ay8910", from, toClock, opts);
   }
 }
