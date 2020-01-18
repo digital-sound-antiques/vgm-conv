@@ -126,11 +126,11 @@ const sections = [
       },
       {
         desc: "Both YM2413 and AY8910 to YM2608",
-        example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608 -o output.vgm"
+        example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608"
       },
       {
         desc: "YM2203's FM part to YM2413 and SSG part to AY8910",
-        example: "$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 -o output.vgm"
+        example: "$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910"
       },
       {
         desc: "Only DAC part of YM2612 to YM2413",
