@@ -3,12 +3,12 @@
 
 Chip-type and clock converter for VGM.
 
-# Chip-Clock Conversion
+# Clock Conversion
 vgm-conv can change chip's clock while maintaining note's frequency. 
 Supported chips are ay8910, ym2203, ym2608, ym3812, y8950, ym3526, ymf262 and ym2413.
 
-# Chip-type Conversion
-vgm-conv can convert VGM data stream for some chip to another chip. 
+# Type Conversion
+vgm-conv supports non-trivial conversions from/to various chip types.
 
 |FROM|TO|
 |-|-|
@@ -45,9 +45,12 @@ $ vgm-conv -f ym2612 -t ym2413 -c 4000000 -o output.vgm input.vgm
 $ vgm-conv -f ym2612.dac -t ym2413 -D useTestMode=true -o output.vgm input.vgm
 ```
 
-# Current Limitation
-- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported yet.
-- Dual chip is not supported yet.
+# Limitation
+- A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
+- YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
+- SN76489 to AY8910 conversion ignores the noise channel.
+- As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
+- Dual chip is not supported.
 
 # Usage
 ```
