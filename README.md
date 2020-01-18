@@ -47,6 +47,11 @@ $ vgm-conv -f ym2612 -t ym2413 -c 4000000 -o output.vgm input.vgm
 $ vgm-conv -f ym2612.dac -t ym2413 -D useTestMode=true -o output.vgm input.vgm
 ```
 
+## Convert YM2203's FM part to YM2413 and SSG part to AY8910
+```sh
+$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 -o output.vgm
+```
+
 # Limitation
 - A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
 - YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
@@ -114,8 +119,8 @@ YM2612 to YM2413 OPTIONS
 EXAMPLES
 
   YM2612 to YM2413                                    $ vgm-conv -f ym2612 -t ym2413 input.vgm                                                 
-  Both YM2413 and AY8910 to YM2608                    $ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608 -o output.vgm    
-  YM2203's FM part to YM2413 and SSG part to AY8910   $ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 -o output.vgm 
+  Both YM2413 and AY8910 to YM2608                    $ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608    
+  YM2203's FM part to YM2413 and SSG part to AY8910   $ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910 
   Only DAC part of YM2612 to YM2413                   $ vgm-conv -f ym2612.dac -t ym2413 input.vgm                                             
   YM2612 to YM2413@4.00MHz                            $ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm     
 ```
