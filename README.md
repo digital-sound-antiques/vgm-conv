@@ -3,11 +3,11 @@
 
 Chip-type and clock converter for VGM.
 
-# Chip-Clock Conversion
+# Clock Conversion
 vgm-conv can change chip's clock while maintaining note's frequency. 
 Supported chips are ay8910, ym2203, ym2608, ym3812, y8950, ym3526, ymf262 and ym2413.
 
-# Chip-type Conversion
+# Type Conversion
 vgm-conv can convert VGM data stream for some chip to another chip. 
 
 |FROM|TO|
