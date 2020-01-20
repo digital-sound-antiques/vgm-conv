@@ -1,5 +1,5 @@
-# vgm-conv
-[![npm version](https://badge.fury.io/js/vgm-conv.svg)](https://badge.fury.io/js/vgm-conv)
+# vgm-conv [![npm version](https://badge.fury.io/js/vgm-conv.svg)](https://badge.fury.io/js/vgm-conv)
+<img src="https://nodei.co/npm/vgm-conv.png?downloads=true&stars=true" alt=""/>
 
 Chip-type and clock converter for VGM.
 
