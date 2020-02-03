@@ -1,6 +1,6 @@
 {
   "name": "vgm-conv",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Chip-type and clock converter for VGM.",
   "main": "dist/index.js",
   "bin": {

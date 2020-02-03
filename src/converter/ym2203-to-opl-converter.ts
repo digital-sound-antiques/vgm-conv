@@ -78,12 +78,12 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
     case 0:
       return [
         {
-          fb: v.fb + 1,
+          fb: Math.min(7, v.fb + 1),
           con: 0,
           slots: [ss[0], { ...ss[3], tl: Math.min(63, ss[3].tl + 4) }]
         },
         {
-          fb: v.fb + 1,
+          fb: Math.min(7, v.fb + 1),
           con: 0,
           slots: [ss[2], { ...ss[3], tl: Math.min(63, ss[3].tl + 8) }]
         }
