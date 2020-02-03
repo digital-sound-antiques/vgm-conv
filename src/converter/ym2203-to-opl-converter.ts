@@ -80,16 +80,16 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
         {
           fb: v.fb + 1,
           con: 0,
-          slots: [ss[0], { ...ss[3], tl: ss[3].tl + 4 }]
+          slots: [ss[0], { ...ss[3], tl: Math.min(63, ss[3].tl + 4) }]
         },
         {
           fb: v.fb + 1,
           con: 0,
-          slots: [ss[2], { ...ss[3], tl: ss[3].tl + 8 }]
+          slots: [ss[2], { ...ss[3], tl: Math.min(63, ss[3].tl + 8) }]
         }
       ];
     case 1:
-      ss[3].tl += 6;
+      ss[3].tl = Math.min(63, ss[3].tl + 6);
       return [
         {
           fb: v.fb,
@@ -104,7 +104,7 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
       ];
     case 2:
     case 3:
-      ss[3].tl += 6;
+      ss[3].tl = Math.min(63, ss[3].tl + 6);
       return [
         {
           fb: v.fb,
