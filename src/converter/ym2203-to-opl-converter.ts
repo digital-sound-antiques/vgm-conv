@@ -138,7 +138,7 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
           slots: [ss[0], ss[1]]
         },
         {
-          fb: 0,
+          fb: v.fb,
           con: 0,
           slots: [ss[0], ss[3]]
         }
@@ -282,7 +282,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
         fb: 7,
         con: 0,
         slots: [
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 26, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 28, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
       };
