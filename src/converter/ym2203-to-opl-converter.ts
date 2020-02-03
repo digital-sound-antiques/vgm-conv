@@ -256,7 +256,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const n = ((8 << ch) & this._regs[0x7]) === 0;
     const v = this._regs[0x08 + ch];
     const vol = v & 0x10 ? 0 : v & 0xf;
-    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + 6);
+    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + 4);
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
