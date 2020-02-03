@@ -54,14 +54,14 @@ function _OPNSlotParamToOPLSlotParam(p: OPNSlotParam, key: boolean): OPLSlotPara
   return {
     am: p.am,
     pm: 0,
-    eg: 0,
+    eg: key ? 0 : 1,
     kr: p.ks >> 1,
     ml: p.ml,
     kl: 0,
     tl: Math.min(63, p.tl),
     ar: _R(p.ar),
-    dr: key ? _R(p.dr) : p.rr,
-    sl: key ? p.sl : 15,
+    dr: _R(p.dr),
+    sl: p.sl,
     rr: key ? _R(p.sr) : p.rr,
     ws: 0
   };
