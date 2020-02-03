@@ -46,7 +46,7 @@ function _R(a: number) {
     case 0:
       return 0;
     default:
-      return Math.max(0, Math.min(15, (a * 14) >> 5));
+      return Math.max(0, Math.min(15, (a - 2) >> 1));
   }
 }
 
@@ -83,7 +83,7 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
           slots: [ss[0], { ...ss[3], tl: ss[3].tl + 4 }]
         },
         {
-          fb: v.fb,
+          fb: v.fb + 1,
           con: 0,
           slots: [ss[2], { ...ss[3], tl: ss[3].tl + 8 }]
         }
@@ -256,7 +256,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const n = ((8 << ch) & this._regs[0x7]) === 0;
     const v = this._regs[0x08 + ch];
     const vol = v & 0x10 ? 0 : v & 0xf;
-    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + 4);
+    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + 6);
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
