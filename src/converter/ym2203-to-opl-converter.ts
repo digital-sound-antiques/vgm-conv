@@ -39,14 +39,25 @@ const muteVoice: OPLVoice = {
   ]
 }
 
-function _R(a: number) {
+function _AR(a: number) {
   switch (a) {
     case 31:
       return 15;
     case 0:
       return 0;
     default:
-      return Math.max(0, Math.min(15, (a - 2) >> 1));
+      return Math.max(1, Math.min(15, (a * 28) >> 6));
+  }
+}
+
+function _DR(a: number) {
+  switch (a) {
+    case 31:
+      return 15;
+    case 0:
+      return 0;
+    default:
+      return Math.max(1, Math.min(15, (a * 28) >> 6));
   }
 }
 
@@ -59,10 +70,10 @@ function _OPNSlotParamToOPLSlotParam(p: OPNSlotParam, key: boolean): OPLSlotPara
     ml: p.ml,
     kl: 0,
     tl: Math.min(63, p.tl),
-    ar: _R(p.ar),
-    dr: _R(p.dr),
+    ar: _AR(p.ar),
+    dr: _DR(p.dr),
     sl: p.sl,
-    rr: key ? _R(p.sr) : p.rr,
+    rr: key ? _DR(p.sr) : p.rr,
     ws: 0
   };
 }
@@ -177,7 +188,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
   _buf = new VGMWriteDataCommandBuffer(256, 1);
   _type: _OPLType;
   _command: number;
-  _keyStatus = new Array<boolean>(6); // 0..2: FM1-3, 3..5: CH-3 SLOT
+  _keyStatus: Array<boolean> = [false, false, false, false, false, false]; // 0..2: FM1-3, 3..5: CH-3 SLOT
   _toClock: number;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
