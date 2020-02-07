@@ -61,6 +61,10 @@ function _DR(a: number) {
   }
 }
 
+function _RR(a: number) {
+  return a;
+}
+
 function _OPNSlotParamToOPLSlotParam(p: OPNSlotParam, key: boolean): OPLSlotParam {
   return {
     am: p.am,
@@ -73,7 +77,7 @@ function _OPNSlotParamToOPLSlotParam(p: OPNSlotParam, key: boolean): OPLSlotPara
     ar: _AR(p.ar),
     dr: _DR(p.dr),
     sl: p.sl,
-    rr: key ? _DR(p.sr) : p.rr,
+    rr: key ? _DR(p.sr) : _RR(p.rr),
     ws: 0
   };
 }
@@ -89,33 +93,30 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
     case 0:
       return [
         {
-          fb: Math.min(7, v.fb + 1),
-          con: 0,
-          slots: [ss[0], { ...ss[3], tl: Math.min(63, ss[3].tl + 4) }]
-        },
-        {
-          fb: Math.min(7, v.fb + 1),
-          con: 0,
-          slots: [ss[2], { ...ss[3], tl: Math.min(63, ss[3].tl + 8) }]
-        }
-      ];
-    case 1:
-      ss[3].tl = Math.min(63, ss[3].tl + 6);
-      return [
-        {
           fb: v.fb,
           con: 0,
-          slots: [ss[0], ss[3]]
+          slots: [ss[0], { ...ss[3], ml: ss[1].ml, tl: Math.min(63, Math.max(0, ss[1].tl - 2) + ss[3].tl) }]
         },
         {
           fb: 0,
           con: 0,
-          slots: [ss[1], ss[3]]
+          slots: [ss[2], ss[3]]
+        }
+      ];
+    case 1:
+      return [
+        {
+          fb: v.fb,
+          con: 0,
+          slots: [ss[0], { ...ss[3], ml: ss[2].ml, tl: Math.min(63, Math.max(0, ss[2].tl - 2) + ss[3].tl) }]
+        },
+        {
+          fb: 0,
+          con: 0,
+          slots: [ss[2], ss[3]]
         }
       ];
     case 2:
-    case 3:
-      ss[3].tl = Math.min(63, ss[3].tl + 6);
       return [
         {
           fb: v.fb,
@@ -128,6 +129,20 @@ function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
           slots: [ss[2], ss[3]]
         }
       ];
+    case 3:
+      return [
+        {
+          fb: v.fb,
+          con: 0,
+          slots: [ss[0], { ...ss[3], ml: ss[1].ml, tl: Math.min(63, Math.max(0, ss[1].tl - 2) + ss[3].tl) }]
+        },
+        {
+          fb: 0,
+          con: 0,
+          slots: [ss[2], ss[3]]
+        }
+      ];
+
     case 4:
       return [
         {
@@ -205,6 +220,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
 
   getInitialCommands(): Array<VGMCommand> {
     this._y(0x01, 0x20); // YM3812 mode
+    this._y(0x0e, 0x00); // no rhythm
     return this._buf.commit();
   }
 
@@ -267,7 +283,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const n = ((8 << ch) & this._regs[0x7]) === 0;
     const v = this._regs[0x08 + ch];
     const vol = v & 0x10 ? 0 : v & 0xf;
-    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + 4);
+    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf]);
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
@@ -275,7 +291,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
         fb: 7,
         con: 0,
         slots: [
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 28, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
       };
@@ -293,7 +309,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
         fb: 7,
         con: 0,
         slots: [
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 28, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
       };
@@ -302,7 +318,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
         fb: 7,
         con: 0,
         slots: [
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 26, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: 63, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
       };
