@@ -11,6 +11,19 @@ function _R(rate: number) {
   return rate;
 }
 
+function _KLFix(kl: number) {
+  switch (kl) {
+    case 0:
+      return 0;
+    case 1:
+      return 2;
+    case 2:
+      return 1;
+    default:
+      return 3;
+  }
+}
+
 type OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
 
 function type2cmd(type: OPLType) {
@@ -65,11 +78,11 @@ export class YM2413ToOPLConverter extends VGMConverter {
       },
       {
         a: 0x40 + modOffset,
-        d: (mod.kl << 6) | (modVolume ? modVolume : mod.tl)
+        d: (_KLFix(mod.kl) << 6) | (modVolume ? modVolume : mod.tl)
       },
       {
         a: 0x40 + carOffset,
-        d: (car.kl << 6) | (carVolume ? carVolume : car.tl)
+        d: (_KLFix(car.kl) << 6) | (carVolume ? carVolume : car.tl)
       },
       {
         a: 0x60 + modOffset,
