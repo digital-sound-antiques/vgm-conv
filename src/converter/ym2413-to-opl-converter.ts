@@ -8,7 +8,6 @@ function getModOffset(ch: number) {
 }
 
 function _R(rate: number) {
-  // if (8 < rate && rate < 15) return rate + 1;
   return rate;
 }
 
@@ -50,18 +49,12 @@ export class YM2413ToOPLConverter extends VGMConverter {
     return this._buf.commit();
   }
 
-  _buildVoiceSetup(
-    ch: number,
-    v: OPLLVoice,
-    modVolume: number | null,
-    carVolume: number | null,
-    al: number
-  ): { a: number; d: number }[] {
+  _writeVoice(ch: number, v: OPLLVoice, modVolume: number | null, carVolume: number | null, key: boolean) {
     const modOffset = getModOffset(ch);
     const carOffset = modOffset + 3;
     const mod = v.slots[0];
     const car = v.slots[1];
-    return [
+    [
       {
         a: 0x20 + modOffset,
         d: (mod.am << 7) | (mod.pm << 6) | (mod.eg << 5) | (mod.kr << 4) | mod.ml
@@ -88,68 +81,46 @@ export class YM2413ToOPLConverter extends VGMConverter {
       },
       {
         a: 0x80 + modOffset,
-        d: (mod.sl << 4) | _R(mod.rr)
+        d: (mod.sl << 4) | (!mod.eg ? _R(mod.rr) : 0)
       },
       {
         a: 0x80 + carOffset,
-        d: (car.sl << 4) | _R(car.rr)
+        d: (car.sl << 4) | _R(car.eg || key ? _R(car.rr) : _R(6))
       },
       {
         a: 0xc0 + ch,
-        d: (this._type === "ymf262" ? 0xf0 : 0) | (v.fb << 1) | al
+        d: (this._type === "ymf262" ? 0xf0 : 0) | (v.fb << 1)
       },
       { a: 0xe0 + modOffset, d: mod.wf ? 1 : 0 },
       { a: 0xe0 + carOffset, d: car.wf ? 1 : 0 }
-    ];
+    ].forEach(({ a, d }) => {
+      this._y(a, d);
+    });
   }
 
   _rflag: boolean = false;
 
-  _buildInstAndVolume(ch: number) {
+  _updateVoice(ch: number) {
     const d = this._regs[0x30 + ch];
     const inst = (d & 0xf0) >> 4;
     const volume = d & 0xf;
-    let voice: OPLLVoice;
-    if (inst === 0) {
-      voice = toOPLLVoice(this._regs);
-    } else {
-      voice = OPLL_VOICES[inst];
-    }
+    const voice = inst === 0 ? toOPLLVoice(this._regs) : OPLL_VOICES[inst];
+    const key = this._regs[0x20 + ch] & 0x10 ? true : false;
 
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._buildVoiceSetup(6, OPLL_VOICES[16], null, (this._regs[0x36] & 0xf) << 1, 0).forEach(({ a, d }) => {
-            this._y(a, d);
-          });
+          this._writeVoice(6, OPLL_VOICES[16], null, volume << 1, key);
           break;
         case 7:
-          this._buildVoiceSetup(
-            7,
-            OPLL_VOICES[17],
-            ((this._regs[0x37] >> 4) & 0xf) << 1,
-            (this._regs[0x37] & 0xf) << 1,
-            1
-          ).forEach(({ a, d }) => {
-            this._y(a, d);
-          });
+          this._writeVoice(7, OPLL_VOICES[17], inst << 1, volume << 1, key);
           break;
         case 8:
-          this._buildVoiceSetup(
-            8,
-            OPLL_VOICES[18],
-            ((this._regs[0x38] >> 4) & 0xf) << 1,
-            (this._regs[0x38] & 0xf) << 1,
-            1
-          ).forEach(({ a, d }) => {
-            this._y(a, d);
-          });
+          this._writeVoice(8, OPLL_VOICES[18], inst << 1, volume << 1, key);
           break;
       }
     } else {
-      this._buildVoiceSetup(ch, voice, null, volume << 2, 0).forEach(({ a, d }) => {
-        this._y(a, d);
-      });
+      this._writeVoice(ch, voice, null, volume << 2, key);
     }
   }
 
@@ -161,14 +132,14 @@ export class YM2413ToOPLConverter extends VGMConverter {
     if (a == 0x0e) {
       if (d & 0x20 && !this._rflag) {
         this._rflag = true;
-        this._buildInstAndVolume(6);
-        this._buildInstAndVolume(7);
-        this._buildInstAndVolume(8);
+        this._updateVoice(6);
+        this._updateVoice(7);
+        this._updateVoice(8);
       } else if (!(d & 0x20) && this._rflag) {
         this._rflag = false;
-        this._buildInstAndVolume(6);
-        this._buildInstAndVolume(7);
-        this._buildInstAndVolume(8);
+        this._updateVoice(6);
+        this._updateVoice(7);
+        this._updateVoice(8);
         this._y(0xbd, 0xc0 | (d & 0x3f));
       } else {
         this._rflag = d & 0x20 ? true : false;
@@ -180,11 +151,12 @@ export class YM2413ToOPLConverter extends VGMConverter {
       this._y(0xa0 + ch, (d & 0x7f) << 1);
     } else if (0x20 <= a && a <= 0x28) {
       const ch = a & 0xf;
+      this._updateVoice(ch);
       this._y(0xb0 + ch, ((d & 0x1f) << 1) | ((this._regs[0x10 + ch] & 0x80) >> 7));
       this._y(0xa0 + ch, (this._regs[0x10 + ch] & 0x7f) << 1);
     } else if (0x30 <= a && a <= 0x38) {
       const ch = a & 0xf;
-      this._buildInstAndVolume(ch);
+      this._updateVoice(ch);
     }
     return this._buf.commit();
   }
