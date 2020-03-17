@@ -104,8 +104,8 @@ export class YM2413ToOPLConverter extends VGMConverter {
         a: 0xc0 + ch,
         d: (this._type === "ymf262" ? 0xf0 : 0) | (v.fb << 1)
       },
-      { a: 0xe0 + modOffset, d: mod.wf ? 1 : 0 },
-      { a: 0xe0 + carOffset, d: car.wf ? 1 : 0 }
+      { a: 0xe0 + modOffset, d: mod.ws ? 1 : 0 },
+      { a: 0xe0 + carOffset, d: car.ws ? 1 : 0 }
     ].forEach(({ a, d }) => {
       this._y(a, d);
     });

@@ -10,7 +10,7 @@ export type OPLLSlotParam = {
   dr: number;
   sl: number;
   rr: number;
-  wf: number;
+  ws: number;
 };
 
 export type OPLLVoice = {
@@ -77,7 +77,7 @@ export function toOPLLVoice(d: ArrayLike<number>): OPLLVoice {
         dr: d[4] & 0xf,
         sl: (d[6] >> 4) & 0xf,
         rr: d[6] & 0xf,
-        wf: (d[3] >> 3) & 1
+        ws: (d[3] >> 3) & 1
       },
       {
         am: (d[1] >> 7) & 1,
@@ -91,7 +91,7 @@ export function toOPLLVoice(d: ArrayLike<number>): OPLLVoice {
         dr: d[5] & 0xf,
         sl: (d[7] >> 4) & 0xf,
         rr: d[7] & 0xf,
-        wf: (d[3] >> 4) & 1
+        ws: (d[3] >> 4) & 1
       }
     ]
   };

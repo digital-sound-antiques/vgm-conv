@@ -106,6 +106,10 @@ const sections = [
     header: "YM2612 to YM2413 OPTIONS",
     content: [
       {
+        def: "{bold -D} autoVoiceMap={underline true|false}",
+        desc: "Auto-select a proper YM2413 voice by analysing YM2612 voice parameters. Default is `true`."
+      },
+      {
         def: "{bold -D} decimation={underline n}",
         desc:
           "Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default value is 4."
@@ -144,7 +148,7 @@ const sections = [
   }
 ];
 
-const defineKeys = ["decimation", "useTestMode", "ws"];
+const defineKeys = ["decimation", "useTestMode", "autoVoiceMap", "ws"];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);

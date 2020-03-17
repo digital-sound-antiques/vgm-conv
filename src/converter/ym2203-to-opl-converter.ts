@@ -1,8 +1,9 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { toOPNVoice, OPNVoice, OPNSlotParam } from "./opn-voices";
+import { toOPNVoice } from "./opn-voices";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
-import { OPLVoice, OPLVoiceToBinary, OPLSlotParam } from "./opl-voices";
+import { OPLVoice, OPLVoiceToBinary } from "./opl-voices";
+import { OPNVoiceToOPLVoice } from "./voice-converter";
 
 type _OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
 
@@ -37,165 +38,6 @@ const muteVoice: OPLVoice = {
       ws: 0
     }
   ]
-}
-
-function _AR(a: number) {
-  switch (a) {
-    case 31:
-      return 15;
-    case 0:
-      return 0;
-    default:
-      return Math.max(1, Math.min(15, (a * 28) >> 6));
-  }
-}
-
-function _DR(a: number) {
-  switch (a) {
-    case 31:
-      return 15;
-    case 0:
-      return 0;
-    default:
-      return Math.max(1, Math.min(15, (a * 28) >> 6));
-  }
-}
-
-function _RR(a: number) {
-  return a;
-}
-
-function _OPNSlotParamToOPLSlotParam(p: OPNSlotParam, key: boolean): OPLSlotParam {
-  return {
-    am: p.am,
-    pm: 0,
-    eg: key ? 0 : 1,
-    kr: p.ks >> 1,
-    ml: p.ml,
-    kl: 0,
-    tl: Math.min(63, p.tl),
-    ar: _AR(p.ar),
-    dr: _DR(p.dr),
-    sl: p.sl,
-    rr: key ? _DR(p.sr) : _RR(p.rr),
-    ws: 0
-  };
-}
-
-function _OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
-  const ss = [
-    _OPNSlotParamToOPLSlotParam(v.slots[0], key),
-    _OPNSlotParamToOPLSlotParam(v.slots[1], key),
-    _OPNSlotParamToOPLSlotParam(v.slots[2], key),
-    _OPNSlotParamToOPLSlotParam(v.slots[3], key)
-  ];
-  switch (v.con) {
-    case 0:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], { ...ss[3], ml: ss[1].ml, tl: Math.min(63, Math.max(0, ss[1].tl - 2) + ss[3].tl) }]
-        },
-        {
-          fb: 0,
-          con: 0,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-    case 1:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], { ...ss[3], ml: ss[2].ml, tl: Math.min(63, Math.max(0, ss[2].tl - 2) + ss[3].tl) }]
-        },
-        {
-          fb: 0,
-          con: 0,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-    case 2:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], ss[3]]
-        },
-        {
-          fb: 0,
-          con: 0,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-    case 3:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], { ...ss[3], ml: ss[1].ml, tl: Math.min(63, Math.max(0, ss[1].tl - 2) + ss[3].tl) }]
-        },
-        {
-          fb: 0,
-          con: 0,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-
-    case 4:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], ss[1]]
-        },
-        {
-          fb: 0,
-          con: 0,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-    case 5:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], ss[1]]
-        },
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], ss[3]]
-        }
-      ];
-    case 6:
-      return [
-        {
-          fb: v.fb,
-          con: 0,
-          slots: [ss[0], ss[1]]
-        },
-        {
-          fb: 0,
-          con: 1,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-    default:
-      return [
-        {
-          fb: v.fb,
-          con: 1,
-          slots: [ss[0], ss[1]]
-        },
-        {
-          fb: 0,
-          con: 1,
-          slots: [ss[2], ss[3]]
-        }
-      ];
-  }
 }
 
 export class YM2203ToOPLConverter extends VGMConverter {
@@ -260,7 +102,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
       regs[0x90 + ch], regs[0x98 + ch], regs[0x94 + ch], regs[0x9c + ch],
       regs[0xb0 + ch], regs[0xb4 + ch]
     ]);
-    const oplVoices = _OPNVoiceToOPLVoice(opnVoice, key);
+    const oplVoices = OPNVoiceToOPLVoice(opnVoice, key);
     this._setVoice(ch * 2, oplVoices[0]);
     this._setVoice(ch * 2 + 1, oplVoices[1]);
   }

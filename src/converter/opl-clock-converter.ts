@@ -11,7 +11,7 @@ export class OPLClockConverter extends VGMClockConverter {
     this._ratio = this.to.clock / from.clock;
   }
 
-  convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMWriteDataCommand[] {
+  convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMCommand[] {
     if (this._ratio !== 1.0) {
       if (0xa0 <= cmd.addr && cmd.addr < 0xc0) {
         this._regs[cmd.addr] = cmd.data;

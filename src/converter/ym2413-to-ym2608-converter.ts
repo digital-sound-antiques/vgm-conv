@@ -1,8 +1,9 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
 
-import { OPNVoice, OPNSlotParam, OPLLVoiceToOPNVoice } from "./opn-voices";
+import { OPNVoice, OPNSlotParam } from "./opn-voices";
 import { toOPLLVoice, OPLL_VOICES, OPLLVoice } from "./opll-voices";
+import { OPLLVoiceToOPNVoice} from "./voice-converter";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 
 /* level key scaling table */

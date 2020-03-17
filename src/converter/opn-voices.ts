@@ -22,33 +22,6 @@ export type OPNVoice = {
   slots: OPNSlotParam[]; // slots[0...3] corresponds to slot1, slot3, slot2, slot4
 };
 
-function R(rate: number): number {
-  switch (rate) {
-    case 0:
-      return 0;
-    case 15:
-      return 31;
-    default:
-      return Math.min(31, Math.round((rate + 1.5) * 2));
-  }
-}
-
-export function OPLLToOPNSlotParam(slot: OPLLSlotParam, car: boolean): OPNSlotParam {
-  return {
-    dt: 0,
-    ml: slot.ml,
-    tl: Math.min(127, slot.tl + (slot.wf ? (car ? 8 : 5) : 0)),
-    ks: slot.kr * 2,
-    ar: R(slot.ar),
-    am: slot.am,
-    dr: R(slot.dr),
-    sr: R(slot.eg ? 0 : slot.rr),
-    sl: slot.sl,
-    rr: slot.eg ? Math.min(15, slot.rr + 1) : car ? 8 : 0,
-    ssg: 0
-  };
-}
-
 export function createOPNSlotParam(): OPNSlotParam {
   return {
     dt: 0,
@@ -66,16 +39,6 @@ export function createOPNSlotParam(): OPNSlotParam {
 }
 
 const emptySlot = createOPNSlotParam();
-
-export function OPLLVoiceToOPNVoice(opll: OPLLVoice): OPNVoice {
-  return {
-    fb: opll.slots[0].wf ? Math.min(7, opll.fb + 6) : opll.fb,
-    con: 2,
-    ams: 4, // 5.9dB
-    pms: opll.slots[0].pm || opll.slots[1].pm ? 2 : 0, // 6.7cent or 0
-    slots: [OPLLToOPNSlotParam(opll.slots[0], false), emptySlot, emptySlot, OPLLToOPNSlotParam(opll.slots[1], true)]
-  };
-}
 
 export function createOPNVoice(): OPNVoice {
   return {

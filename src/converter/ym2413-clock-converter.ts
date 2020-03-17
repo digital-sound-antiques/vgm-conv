@@ -12,7 +12,7 @@ export class YM2413ClockConverter extends VGMClockConverter {
     this._ratio = this.to.clock / from.clock;
   }
 
-  convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMWriteDataCommand[] {
+  convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMCommand[] {
     if (this._ratio !== 1.0 && cmd.addr != null) {
       if (0x10 <= cmd.addr && cmd.addr < 0x30) {
         this._regs[cmd.addr] = cmd.data;
