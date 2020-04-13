@@ -217,12 +217,12 @@ function main(argv: string[]) {
   }
 
   if (process.platform === "win32") {
-    if (options.file == null) {
-      console.error("Please specify input file. Standard input can not be used on Windows.");
+    if (options.input == null) {
+      console.error("Please specify '--input' option. Standard input can not be used on Windows.");
       return;
     }
     if (options.output == null) {
-      console.error("Please specify output file. Standard output can not be used on Windows.");
+      console.error("Please specify '--output' option. Standard output can not be used on Windows.");
       return;
     }
   }
