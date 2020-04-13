@@ -2,18 +2,12 @@ import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
 import { toOPNVoice, OPNVoice } from "./opn-voices";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
+import { OPNVoiceToOPLVoice, estimateOPLLVoice } from "./voice-converter";
 
-const voices = [
-  { inst: 0, voff: 0 },
-  { inst: 0, voff: 0 },
-  { inst: 0, voff: 0 },
-  { inst: 0, voff: 0 },
-  { inst: 0, voff: 0 },
-  { inst: 0, voff: 0 }
-];
+const fallback_voice = { inst: 0, voff: 0, ooff: 0 };
 
 /** instrument data to voice and volue offset (attenuation) */
-const voiceMap: { [key: string]: { inst: number; voff: number } } = {};
+const voiceMap: { [key: string]: { inst: number; voff: number; ooff: number } } = {};
 
 export abstract class OPNToYM2413Converter extends VGMConverter {
   _voiceHashMap: { [key: string]: OPNVoice } = {};
@@ -21,7 +15,15 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     hash: string;
     inst: number;
     voff: number;
-  }[] = [];
+    ooff: number;
+  }[] = [
+    { hash: "", ...fallback_voice },
+    { hash: "", ...fallback_voice },
+    { hash: "", ...fallback_voice },
+    { hash: "", ...fallback_voice },
+    { hash: "", ...fallback_voice },
+    { hash: "", ...fallback_voice }
+  ];
 
   _div = 0;
   _regs = [new Uint8Array(256), new Uint8Array(256)];
@@ -30,10 +32,12 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
   _keyFlags = [0, 0, 0, 0, 0, 0];
 
   _waveType: "saw" | "sqr" | "sin" | string;
+  _autoVoiceMap: boolean;
 
-  constructor(from: ChipInfo, to: ChipInfo, opts: any) {
+  constructor(from: ChipInfo, to: ChipInfo, opts: { ws?: string; autoVoiceMap?: boolean }) {
     super(from, to);
     this._waveType = opts.ws || "saw";
+    this._autoVoiceMap = opts.autoVoiceMap || true;
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
@@ -59,16 +63,19 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     ];
     const nextHash = rawVoice.map(e => ("0" + e.toString(16)).slice(-2)).join("");
     const prevVoice = this._currentVoice[ch];
-    if (prevVoice == null || nextHash != prevVoice.hash) {
+    if (nextHash != prevVoice.hash) {
       const isNew = this._voiceHashMap[nextHash] == null;
       // if (isNew) {
       //   console.log(`CH${ch},${nextHash}`);
       // }
       const opnVoice = toOPNVoice(rawVoice);
       this._voiceHashMap[nextHash] = opnVoice;
+      const estimated_voice = this._autoVoiceMap
+        ? estimateOPLLVoice(OPNVoiceToOPLVoice(opnVoice, true)[0])
+        : { inst: 0, voff: 1, ooff: 0 };
       this._currentVoice[ch] = {
         hash: nextHash,
-        ...(voiceMap[nextHash] || voices[ch])
+        ...(voiceMap[nextHash] || estimated_voice || fallback_voice)
       };
     }
   }
@@ -77,7 +84,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     const regs = this._regs[port];
     const ch = nch + port * 3;
     const alg = regs[0xb0 + nch] & 7;
-    if (this._currentVoice[ch] == null) {
+    if (this._currentVoice[ch].hash == "") {
       this._identifyVoice(ch);
     }
     const { inst, voff } = this._currentVoice[ch];

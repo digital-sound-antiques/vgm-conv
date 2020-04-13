@@ -97,6 +97,10 @@ const sections = [
     header: "YM2203/2608 to YM2413 OPTIONS",
     content: [
       {
+        def: "{bold -D} autoVoiceMap={underline true|false}",
+        desc: "Auto-select a proper YM2413 voice by analysing YM2612 voice parameters. Default is `true`."
+      },
+      {
         def: "{bold -D} ws={underline sqr|saw|sin}",
         desc: "Specify wave shape to simulate OPNx voice. Default: `saw`."
       }

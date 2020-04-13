@@ -1,6 +1,6 @@
 import { OPNSlotParam, OPNVoice, createOPNSlotParam } from "./opn-voices";
 import { OPLSlotParam, OPLVoice } from "./opl-voices";
-import { OPLLSlotParam, OPLLVoice } from "./opll-voices";
+import { OPLLSlotParam, OPLLVoice, toOPLLVoice, OPLL_VOICES } from "./opll-voices";
 
 export function OPLLToOPNSlotParam(slot: OPLLSlotParam, car: boolean): OPNSlotParam {
   function _RR(rate: number): number {
@@ -199,4 +199,59 @@ export function OPNVoiceToOPLVoice(v: OPNVoice, key: boolean): Array<OPLVoice> {
         }
       ];
   }
+}
+
+const _user_voice = [0x01, 0x01, 0x1c, 0x07, 0xf0, 0xd7, 0x00, 0x11];
+const _opll_voices = [toOPLLVoice(_user_voice), ...OPLL_VOICES.slice(1)];
+const _ml_tbl = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 12, 12, 15, 15];
+
+export function estimateOPLLVoice(opl: OPLVoice): { inst: number; voff: number; ooff: number } {
+  let diff = Infinity;
+  let inst = 0;
+  for (let i = 0; i < _opll_voices.length; i++) {
+    const opll = _opll_voices[i];
+    if (i == 13) continue;
+    let d = 0;
+    const ml_a = opl.slots[1].ml / _ml_tbl[opl.slots[0].ml];
+    const ml_b = opll.slots[1].ml / _ml_tbl[opll.slots[0].ml];
+    d += Math.abs(ml_a - ml_b) << 1;
+    d += Math.abs(opl.fb - opll.fb) >> 1;
+    d += Math.abs(opl.slots[0].ar - opll.slots[0].ar);
+    d += Math.abs(opl.slots[1].ar - opll.slots[1].ar);
+    d += Math.abs(opl.slots[0].dr - opll.slots[0].dr);
+    d += Math.abs(opl.slots[1].dr - opll.slots[1].dr);
+    d +=
+      Math.min(
+        63,
+        4 * Math.abs(opl.slots[0].sl - opll.slots[0].sl) +
+          Math.abs(opl.slots[0].tl - (opll.slots[0].tl + opll.slots[0].ws ? 8 : 0))
+      ) >> 3;
+    if (opl.slots[1].rr === 0) {
+      // sustainable tone
+      if (opll.slots[1].eg === 0) {
+        continue;
+      }
+      d += Math.abs(opl.slots[1].sl - opll.slots[1].sl);
+    } else {
+      // percusive tone
+      if (opll.slots[1].eg === 1) {
+        continue;
+      }
+      d += Math.abs(opl.slots[1].rr - opll.slots[1].rr);
+    }
+    if (d < diff) {
+      inst = i;
+      diff = d;
+    }
+  }
+  const opll = _opll_voices[inst];
+  const ooff = Math.floor(Math.log2(_ml_tbl[opl.slots[1].ml] / _ml_tbl[opll.slots[1].ml]) / 2);
+  let voff = 1;
+  if (opll.slots[1].ws) {
+    voff -= 2;
+    if (opll.slots[0].ws) {
+      voff -= 2;
+    }
+  }
+  return { inst, voff, ooff };
 }
