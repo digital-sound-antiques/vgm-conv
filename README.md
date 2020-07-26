@@ -107,10 +107,6 @@ CHIP CONVERSION
   ym2608, ym2608.ssg              ay8910                                        
   ym2612, ym2612.fm, ym2612.dac   ym2413                                        
 
-YM2203/2608 to YM2413 OPTIONS
-
-  -D ws=sqr|saw|sin   Specify wave shape to simulate OPNx voice. Default: `saw`. 
-
 YM2612 to YM2413 OPTIONS
 
   -D decimation=n             Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 

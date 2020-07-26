@@ -1,38 +1,12 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
-
-import { OPNVoice, OPNSlotParam } from "./opn-voices";
-import { toOPLLVoice, OPLL_VOICES, OPLLVoice } from "./opll-voices";
-import { OPLLVoiceToOPNVoice} from "./voice-converter";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
+import { OPNSlotParam, OPLLVoiceMap, OPLLVoice } from "ym-voice";
 
 /* level key scaling table */
 const KSLTable = [0, 24, 32, 37, 40, 43, 45, 47, 48, 50, 51, 52, 53, 54, 55, 56];
 
-type OPNVoiceEx = OPNVoice & {
-  slots: Array<OPNSlotParam & { pm: number; kl: number }>;
-};
-
-function OPLLVoiceToOPNVoiceEx(opll: OPLLVoice): OPNVoiceEx {
-  const opn = OPLLVoiceToOPNVoice(opll);
-  return {
-    fb: opn.fb,
-    con: opn.con,
-    ams: opn.ams,
-    pms: opn.pms,
-    slots: [
-      { ...opn.slots[0], pm: opll.slots[0].pm, kl: opll.slots[0].kl },
-      { ...opn.slots[1], pm: 0, kl: 0 },
-      { ...opn.slots[2], pm: 0, kl: 0 },
-      { ...opn.slots[3], pm: opll.slots[1].pm, kl: opll.slots[1].kl }
-    ]
-  };
-}
-
-const ROM_VOICES: Array<OPNVoiceEx> = [];
-for (let i = 0; i < OPLL_VOICES.length; i++) {
-  ROM_VOICES.push(OPLLVoiceToOPNVoiceEx(OPLL_VOICES[i]));
-}
+const ROM_VOICES = OPLLVoiceMap.map((e) => { return { opll: e, opn: e.toOPN() }; });
 
 export class YM2413ToYM2608Converter extends VGMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
@@ -40,8 +14,14 @@ export class YM2413ToYM2608Converter extends VGMConverter {
   }
   _regs = new Uint8Array(256).fill(0);
   _buf = new VGMWriteDataCommandBuffer(256, 2);
-  _userVoice: OPNVoiceEx = ROM_VOICES[0];
-  _voiceMap = [ROM_VOICES[0], ROM_VOICES[0], ROM_VOICES[0], ROM_VOICES[0], ROM_VOICES[0], ROM_VOICES[0]];
+  _userVoice = { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() };
+  _voiceMap = [
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() }];
 
   _y(port: number, addr: number, data: number, optimize: boolean = true) {
     const cmd = (this.from.index == 0 ? 0x56 : 0xa6) + port;
@@ -70,13 +50,13 @@ export class YM2413ToYM2608Converter extends VGMConverter {
 
     /* level key scale emulation */
     const kll = Math.max(0, KSLTable[fnum_h] - 8 * (7 - oct));
-    const tll = (vl: number, slot: OPNSlotParam & { kl: number }) => {
-      return Math.min(127, vl + slot.tl + (slot.kl ? kll >> (3 - slot.kl) : 0));
+    const tll = (vl: number, slot: OPNSlotParam, kl: number) => {
+      return Math.min(127, vl + slot.tl + (kl ? kll >> (3 - kl) : 0));
     };
-    this._y(port, 0x40 + nch, tll(0, voice.slots[0]));
-    this._y(port, 0x44 + nch, tll(0, voice.slots[1]));
-    this._y(port, 0x48 + nch, tll(0, voice.slots[2]));
-    this._y(port, 0x4c + nch, tll(volume << 2, voice.slots[3]));
+    this._y(port, 0x40 + nch, tll(0, voice.opn.slots[0], voice.opll.slots[0].kl));
+    this._y(port, 0x44 + nch, tll(0, voice.opn.slots[1], 0));
+    this._y(port, 0x48 + nch, tll(0, voice.opn.slots[2], 0));
+    this._y(port, 0x4c + nch, tll(volume << 2, voice.opn.slots[3], voice.opll.slots[1].kl));
   }
 
   _setInstVolume(port: number, nch: number, iv: number) {
@@ -87,15 +67,17 @@ export class YM2413ToYM2608Converter extends VGMConverter {
     const voice = inst === 0 ? this._userVoice : ROM_VOICES[inst];
     this._voiceMap[ch] = voice;
 
-    this._y(port, 0xb0 + nch, (voice.fb << 3) | voice.con);
-    this._y(port, 0xb4 + nch, 0xc0 | (voice.ams << 4) | voice.pms);
+    const opnVoice = voice.opn;
+
+    this._y(port, 0xb0 + nch, (opnVoice.fb << 3) | opnVoice.con);
+    this._y(port, 0xb4 + nch, 0xc0 | (opnVoice.ams << 4) | opnVoice.pms);
 
     for (let i = 0; i < 4; i++) {
-      this._y(port, 0x30 + i * 4 + nch, (voice.slots[i].dt << 4) | voice.slots[i].ml);
-      this._y(port, 0x50 + i * 4 + nch, (voice.slots[i].ks << 6) | voice.slots[i].ar);
-      this._y(port, 0x60 + i * 4 + nch, (voice.slots[i].am << 7) | voice.slots[i].dr);
-      this._y(port, 0x70 + i * 4 + nch, voice.slots[i].sr);
-      this._y(port, 0x80 + i * 4 + nch, (voice.slots[i].sl << 4) | voice.slots[i].rr);
+      this._y(port, 0x30 + i * 4 + nch, (opnVoice.slots[i].dt << 4) | opnVoice.slots[i].ml);
+      this._y(port, 0x50 + i * 4 + nch, (opnVoice.slots[i].ks << 6) | opnVoice.slots[i].ar);
+      this._y(port, 0x60 + i * 4 + nch, (opnVoice.slots[i].am << 7) | opnVoice.slots[i].dr);
+      this._y(port, 0x70 + i * 4 + nch, opnVoice.slots[i].sr);
+      this._y(port, 0x80 + i * 4 + nch, (opnVoice.slots[i].sl << 4) | opnVoice.slots[i].rr);
     }
     const blk_fnum = ((this._regs[0x20 + ch] & 0xf) << 8) | this._regs[0x10 + ch];
     this._setSlotVolume(port, nch, blk_fnum, volume);
@@ -107,7 +89,8 @@ export class YM2413ToYM2608Converter extends VGMConverter {
 
     if (a < 0x08) {
       this._regs[a] = d;
-      this._userVoice = OPLLVoiceToOPNVoiceEx(toOPLLVoice(this._regs));
+      const opllVoice = OPLLVoice.decode(this._regs);
+      this._userVoice = { opll: opllVoice, opn: opllVoice.toOPN() };
       for (let ch = 0; ch < 6; ch++) {
         const iv = this._regs[0x30 + ch];
         if (iv >> 4 === 0) {

@@ -1,7 +1,7 @@
-import { OPLL_VOICES, OPLLVoice, toOPLLVoice } from "./opll-voices";
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
+import { OPLLVoice, OPLLVoiceMap } from "ym-voice";
 
 function getModOffset(ch: number) {
   return 8 * Math.floor(ch / 3) + (ch % 3);
@@ -117,19 +117,19 @@ export class YM2413ToOPLConverter extends VGMConverter {
     const d = this._regs[0x30 + ch];
     const inst = (d & 0xf0) >> 4;
     const volume = d & 0xf;
-    const voice = inst === 0 ? toOPLLVoice(this._regs) : OPLL_VOICES[inst];
+    const voice = inst === 0 ? OPLLVoice.decode(this._regs) : OPLLVoiceMap[inst];
     const key = this._regs[0x20 + ch] & 0x10 ? true : false;
 
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._writeVoice(6, OPLL_VOICES[16], null, volume << 1, key);
+          this._writeVoice(6, OPLLVoiceMap[16], null, volume << 1, key);
           break;
         case 7:
-          this._writeVoice(7, OPLL_VOICES[17], inst << 1, volume << 1, key);
+          this._writeVoice(7, OPLLVoiceMap[17], inst << 1, volume << 1, key);
           break;
         case 8:
-          this._writeVoice(8, OPLL_VOICES[18], inst << 1, volume << 1, key);
+          this._writeVoice(8, OPLLVoiceMap[18], inst << 1, volume << 1, key);
           break;
       }
     } else {

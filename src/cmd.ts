@@ -49,6 +49,12 @@ const optionDefinitions = [
     type: Boolean
   },
   {
+    name: "version",
+    alias: "v",
+    description: "Show version.",
+    type: Boolean
+  },
+  {
     name: "help",
     alias: "h",
     description: "Show this help.",
@@ -94,25 +100,8 @@ const sections = [
     ]
   },
   {
-    header: "YM2203/2608 to YM2413 OPTIONS",
-    content: [
-      {
-        def: "{bold -D} autoVoiceMap={underline true|false}",
-        desc: "Auto-select a proper YM2413 voice by analysing YM2612 voice parameters. Default is `true`."
-      },
-      {
-        def: "{bold -D} ws={underline sqr|saw|sin}",
-        desc: "Specify wave shape to simulate OPNx voice. Default: `saw`."
-      }
-    ]
-  },
-  {
     header: "YM2612 to YM2413 OPTIONS",
     content: [
-      {
-        def: "{bold -D} autoVoiceMap={underline true|false}",
-        desc: "Auto-select a proper YM2413 voice by analysing YM2612 voice parameters. Default is `true`."
-      },
       {
         def: "{bold -D} decimation={underline n}",
         desc:
@@ -257,6 +246,19 @@ function main(argv: string[]) {
     if (options["no-gd3"]) {
       converted.gd3tag = undefined;
     }
+    converted.volumeModifier = 0x00;
+    // converted.extraHeader = {
+    //   volumes: [
+    //     {
+    //       chip: "ay8910",
+    //       chipId: 18,
+    //       paired: false,
+    //       flags: 0,
+    //       volume: 128,
+    //       absolute: false
+    //     }
+    //   ]
+    // };
     const compress = /\.vgz/i.test(output);
     const res = Buffer.from(converted.build({ compress }));
     if (output) {
@@ -265,7 +267,7 @@ function main(argv: string[]) {
       process.stdout.write(res);
     }
   } catch (e) {
-    console.error(e.message);
+    console.log(e.message);
   }
 }
 

@@ -1,9 +1,7 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { toOPNVoice } from "./opn-voices";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
-import { OPLVoice, OPLVoiceToBinary } from "./opl-voices";
-import { OPNVoiceToOPLVoice } from "./voice-converter";
+import { OPLVoice, OPNVoice } from "ym-voice";
 
 type _OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
 
@@ -22,7 +20,7 @@ function type2cmd(type: _OPLType) {
 }
 
 // prettier-ignore
-const muteVoice: OPLVoice = {
+const muteVoice = new OPLVoice({
   fb: 7, con: 0,
   slots: [
     {
@@ -38,7 +36,7 @@ const muteVoice: OPLVoice = {
       ws: 0
     }
   ]
-}
+});
 
 export class YM2203ToOPLConverter extends VGMConverter {
   _regs = new Uint8Array(256);
@@ -67,7 +65,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
   }
 
   _setVoice(opl_ch: number, v: OPLVoice) {
-    const b = OPLVoiceToBinary(v);
+    const b = v.encode();
     const o = Math.floor(opl_ch / 3) * 8 + (opl_ch % 3);
 
     this._y(0x20 + o, b[0]);
@@ -92,7 +90,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const key = this._keyStatus[ch];
     const regs = this._regs;
     // prettier-ignore
-    const opnVoice = toOPNVoice([
+    const opnVoice = OPNVoice.decode([
       regs[0x30 + ch], regs[0x38 + ch], regs[0x34 + ch], regs[0x3c + ch],
       regs[0x40 + ch], regs[0x48 + ch], regs[0x44 + ch], regs[0x4c + ch],
       regs[0x50 + ch], regs[0x58 + ch], regs[0x54 + ch], regs[0x5c + ch],
@@ -102,7 +100,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
       regs[0x90 + ch], regs[0x98 + ch], regs[0x94 + ch], regs[0x9c + ch],
       regs[0xb0 + ch], regs[0xb4 + ch]
     ]);
-    const oplVoices = OPNVoiceToOPLVoice(opnVoice, key);
+    const oplVoices = opnVoice.toOPL(key);
     this._setVoice(ch * 2, oplVoices[0]);
     this._setVoice(ch * 2 + 1, oplVoices[1]);
   }
@@ -129,41 +127,41 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
-      ssgVoice = {
+      ssgVoice = new OPLVoice({
         fb: 7,
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
-      };
+      });
     } else if (!t && n) {
-      ssgVoice = {
+      ssgVoice = new OPLVoice({
         fb: 7,
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: np >> 1, kl: 0, tl: np >> 4, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: np >> 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
-      };
+      });
     } else if (t && n) {
-      ssgVoice = {
+      ssgVoice = new OPLVoice({
         fb: 7,
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
-      };
+      });
     } else {
-      ssgVoice = {
+      ssgVoice = new OPLVoice({
         fb: 7,
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: 63, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
         ]
-      };
+      });
     }
     this._setVoice(ch + 6, ssgVoice);
   }

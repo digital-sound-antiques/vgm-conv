@@ -1,6 +1,5 @@
 import { VGM, VGMDataStream, VGMEndCommand, parseVGMCommand } from "vgm-parser";
 import { VGMConverter, ChipInfo } from "./converter/vgm-converter";
-import { YM2612ToYM2413Converter } from "./converter/ym2612-to-ym2413-converter";
 import { YM2413ClockConverter } from "./converter/ym2413-clock-converter";
 import { AY8910ClockConverter } from "./converter/ay8910-clock-converter";
 import { YM2203ClockConverter, YM2608ClockConverter, YM2612ClockConverter } from "./converter/opn-clock-converter";
@@ -12,7 +11,9 @@ import { OPLClockConverter } from "./converter/opl-clock-converter";
 import { SN76489ClockConverter } from "./converter/sn76489-clock-converter";
 import { SN76489ToAY8910Converter } from "./converter/sn76489-to-ay8910-converter";
 import { SN76489ToOPNConverter } from "./converter/sn76489-to-opn-converter";
-import { YM2203ToYM2413Converter, YM2608ToYM2413Converter } from "./converter/opn-to-ym2413-converter";
+import { YM2203ToYM2413Converter } from "./converter/ym2203-to-ym2413-converter";
+import { YM2608ToYM2413Converter } from "./converter/ym2608-to-ym2413-converter";
+import { YM2612ToYM2413Converter } from "./converter/ym2612-to-ym2413-converter";
 import { YM2203ToAY8910Converter, YM2608ToAY8910Converter } from "./converter/ssg-to-ay8910-converter";
 import { YM2203ToOPLConverter } from "./converter/ym2203-to-opl-converter";
 
