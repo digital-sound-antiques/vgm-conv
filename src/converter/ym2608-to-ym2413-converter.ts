@@ -76,7 +76,7 @@ export class YM2608ToYM2413Converter extends OPNToYM2413Converter {
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     const convertSSG = this.from.subModule == null || this.from.subModule === "ssg";
     const convertFM = this.from.subModule == null || this.from.subModule === "fm" || this.from.subModule == "fm_r";
-    const convertRhythm = this.from.subModule == null || this.from.subModule === "r";
+    const convertRhythm = this.from.subModule == null || this.from.subModule === "r" || this.from.subModule == "fm_r";
 
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === "ym2608" && cmd.index === this.from.index) {
       if (cmd.addr < 0x10 && cmd.port === 0) {

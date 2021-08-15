@@ -100,8 +100,7 @@ const sections = [
       { from: "sn76489", to: "ay8910, ym2203, ym2608, ym2612" },
       { from: "ym2413", to: "ym2608, ym3812, y8950, ym3526, ymf262" },
       { from: "ym2203, ym2203.fm", to: "ym2413" },
-      { from: "ym2608, ym2608.fm", to: "ym2413" },
-      { from: "ym2608.fm_r, ym2608.r", to: "ym2413" },
+      { from: "ym2608, ym2608.fm, ym2608.r", to: "ym2413" },
       { from: "ym2203, ym2203.ssg", to: "ay8910" },
       { from: "ym2608, ym2608.ssg", to: "ay8910" },
       { from: "ym2612, ym2612.fm, ym2612.dac", to: "ym2413" }
