@@ -100,7 +100,7 @@ function _programString(program: number) {
 function _volumeMapEntryString(voice: VoiceDefinition) {
   const res = [`i:${_programString(voice.program)}`];
   if (voice.volumeOffset != 0) {
-    res.push(`v:${voice.volumeOffset}`);
+    res.push(`v:${-voice.volumeOffset}`);
   }
   if (voice.octaveOffset != 0) {
     res.push(`o:${voice.octaveOffset}`);
