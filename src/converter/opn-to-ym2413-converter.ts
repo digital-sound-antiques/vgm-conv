@@ -346,8 +346,8 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     this._y(0x27, 0x05);
     this._y(0x28, 0x01);
     this._y(0x36, 0x00);
-    this._y(0x37, 0x22);
-    this._y(0x38, 0x00);
+    this._y(0x37, 0x20);
+    this._y(0x38, 0x02);
     return this._buf.commit();
   }
 

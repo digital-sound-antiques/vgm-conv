@@ -12,7 +12,6 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
     this._dacEmulation = this.opts.dacEmulation ||
       this.opts.voiceTable?.opn2opll?.dacEmulation ||
       this._dacEmulation;
-    console.log(this._dacEmulation);
   }
 
   getInitialCommands(): Array<VGMCommand> {
