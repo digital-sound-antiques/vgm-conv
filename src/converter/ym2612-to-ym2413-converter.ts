@@ -5,16 +5,20 @@ import { YM2413DACTable } from "./ym2413-dac-table";
 
 export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
   rootPcmChannel = 6;
+  _dacEmulation: "test" | "fmpcm" | "none" = "fmpcm";
 
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, { chip: "ym2413", index: from.index, clock: 1 / 2, relativeClock: true }, opts);
+    this._dacEmulation = this.opts.dacEmulation ||
+      this.opts.voiceTable?.opn2opll?.dacEmulation ||
+      this._dacEmulation;
   }
 
   getInitialCommands(): Array<VGMCommand> {
-    // select FM 9-ch mode
-    this._y(14, 0);
 
-    if (this.opts.useTestMode) {
+    if (this._dacEmulation === "test") {
+      // select FM 9-ch mode
+      this._y(14, 0);
       this._y(15, 4);
       // Set saw wave to user-defined voice.
       this._y(1, 0x2c);
@@ -33,7 +37,10 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
       this._y(32 + this.rootPcmChannel, 0x1e, false);
       this._y(33 + this.rootPcmChannel, 0x1e, false);
       this._y(34 + this.rootPcmChannel, 0x1e, false);
-    } else {
+      return this._buf.commit();
+    } else if (this._dacEmulation === "fmpcm") {
+      // select FM 9-ch mode
+      this._y(14, 0);
       // make sure all channels key-off
       this._y(37, 0, false);
       this._y(38, 0, false);
@@ -71,8 +78,10 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
       this._y(22, 0, false);
       this._y(23, 0, false);
       this._y(24, 0, false);
+      return this._buf.commit();
+    } else {
+      return super.getInitialCommands();
     }
-    return this._buf.commit();
   }
 
   _pcmData = new Uint8Array();
@@ -83,12 +92,12 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
     this._pcmIndex++;
 
     if (this.opts.decimation <= 1 || this._div % this.opts.decimation !== 0) {
-      if (this.opts.useTestMode) {
+      if (this._dacEmulation === "test") {
         const vv = 47 + Math.round((208 * v) / 255);
         this._y(16 + this.rootPcmChannel, vv, false);
         this._y(17 + this.rootPcmChannel, vv, false);
         this._y(18 + this.rootPcmChannel, vv, false);
-      } else {
+      } else if (this.opts._dacEmulation === "fmpcm") {
         const idx = Math.min(768, v * 4) & 0x3f8;
         const vs = YM2413DACTable[idx];
         for (let i = 0; i < 3; i++) {
@@ -125,7 +134,7 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
         if (this.from.subModule == "fm" && cmd.addr == 0x2b) {
           return [cmd];
         }
-        if (!this.opts.useTestMode) {
+        if (this._dacEmulation != "test") {
           return this.convertFM(cmd);
         }
         return [];

@@ -1,6 +1,7 @@
 import commandLineArgs from "command-line-args";
 import commandLineUsage from "command-line-usage";
 import fs from "fs";
+import path from "path";
 import convertVGM from "./index";
 import { VGM } from "vgm-parser";
 
@@ -47,6 +48,12 @@ const optionDefinitions = [
     name: "no-gd3",
     description: "Remove GD3 tag from output.",
     type: Boolean
+  },
+  {
+    name: "voiceTable",
+    typeLabel: "{underline file}",
+    description: "Specify the voice table file in JavaScript.",
+    type: String
   },
   {
     name: "version",
@@ -108,9 +115,10 @@ const sections = [
           "Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default value is 4."
       },
       {
-        def: "{bold -D} useTestMode={underline true|false}",
-        desc:
-          "If `true`, YM2413 test mode 7.5bit DAC is used but disables all YM2413 FM channels. Otherwise pseudo 6-bit DAC is used. The default value is `false`."
+        def: "{bold -D} dacEmulation={underline fmpcm|test|none}",
+        desc: `fmpcm: use the pseudo 6-bit DAC emulation on FM channels is used (default).
+               test:  use YM2413 test mode to realize 7.5bit DAC but this disables all FM channels.
+               none:  disable DAC emulation (default).`
       }
     ]
   },
@@ -141,7 +149,7 @@ const sections = [
   }
 ];
 
-const defineKeys = ["decimation", "useTestMode", "autoVoiceMap", "ws"];
+const defineKeys = ["decimation", "dacEmulation", "ws"];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
@@ -163,7 +171,7 @@ function parseValue(text: string): boolean | string | number {
   return text;
 }
 
-function parseDefines(defs: Array<string>): {} {
+function parseDefines(defs: Array<string>): { [key:string]: any } {
   const res: any = {};
   for (const def of defs || []) {
     const nv = def.split("=");
@@ -176,7 +184,6 @@ function parseDefines(defs: Array<string>): {} {
       res[nv[0]] = parseValue(nv[1]);
     }
   }
-
   return res;
 }
 
@@ -242,6 +249,17 @@ function main(argv: string[]) {
 
   try {
     const opts = parseDefines(options.define);
+
+    if(options.voiceTable) {
+      try {
+      const { voiceTable } = require(path.resolve(options.voiceTable));
+      opts["voiceTable"] = voiceTable;
+      } catch(e) {
+        console.error("Error in loading voice table.");
+        throw e;
+      }
+    }
+
     const converted = convertVGM(vgm, from, to, opts);
     if (options["no-gd3"]) {
       converted.gd3tag = undefined;
@@ -267,7 +285,8 @@ function main(argv: string[]) {
       process.stdout.write(res);
     }
   } catch (e) {
-    console.log(e.message);
+    console.error(e.message);
+    process.exit(1);
   }
 }
 

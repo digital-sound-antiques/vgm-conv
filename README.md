@@ -84,7 +84,9 @@ OPTIONS
   -D, --define name=value   Define converter option variable. See below.                                  
   -o, --output file         Output VGM file. The standard output is used if not speicified. If the given  
                             file is *.vgz, the output will be compressed.                                 
-  --no-gd3                  Remove GD3 tag from output.                                                   
+  --no-gd3                  Remove GD3 tag from output.
+  --voiceTable file         Specify the voice table file.  
+  -v, --version             Show version.                                                    
   -h, --help                Show this help.                                                               
 
 CLOCK CONVERSION
@@ -109,10 +111,11 @@ CHIP CONVERSION
 
 YM2612 to YM2413 OPTIONS
 
-  -D decimation=n             Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 
-                              disables the feature and results the best playback quality. The default value is 4.                       
-  -D useTestMode=true|false   If `true`, YM2413 test mode 7.5bit DAC is used but disables all YM2413 FM channels. Otherwise pseudo 6-   
-                              bit DAC is used. The default value is `false`.                                                            
+  -D decimation=n                  Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 
+                                   disables the feature and results the best playback quality. The default value is 4.                       
+  -D dacEmulation=fmpcm|test|none  fmpcm: use pseudo 6-bit DAC is used (default).
+                                   test:  use YM2413 test mode is used 7.5bit DAC but disables all YM2413 FM channels.
+                                   none:  disable DAC emulation.
 
 EXAMPLES
 
@@ -122,3 +125,44 @@ EXAMPLES
   Only DAC part of YM2612 to YM2413                   $ vgm-conv -f ym2612.dac -t ym2413 input.vgm                                             
   YM2612 to YM2413@4.00MHz                            $ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm     
 ```
+
+# Voice Table (Beta)
+The voice table file can be defined in JavaScript. Only OPN to OPLL conversion is supported.
+
+```voice.js
+const [HH, CYM, TOM, SD, BD] = [1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14];
+const [Violin, Piano, Guitar, Flute, Clarinet, Oboe, Trumpet, Organ, Horn, Synthsizer, Harpsicode, Vibraphone, SynthBass, WoodBass, ElectricBass] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+module.exports = {
+  voiceTable: {
+    opn2opll: {
+      // Override `-D dacEmulation` option. This must be set "none" to enable rhythm channels.
+      dacEmulation: "none",
+      // User defined voice table
+      voices: {
+        // Original Tones can be defined from program number 16 to 1023.
+        16: [0x01, 0x01, 0x1c, 0x07, 0xf0, 0xd7, 0x00, 0x11],
+      },
+      mapping: {
+        // i: Voice Number (required)
+        // - 1...15: ROM Voice
+        // - 16...1023: User defined voice
+        // - 1024: HiHat, 2048: Cymbal, 4096: Tom, 8192: Snare, 16384: Bassdrum
+        // v: Volume offset: -15<=v<=15 (default: 0)
+        // o: Octave offset: -7<=o<=7 (default: 0)
+        "520030001c1f257fdf1fdf1f0709068607060608251515f5000000000100": { i: Harpsicode, v: 1, o: -1 },
+        "0f30005000120f121f1f1f1d01000106000f010b113117f1000000003e00": { i: SD, v: -1, o: -1 },
+        "3e5051501f171c10df1bdf1f07070e040701010154f65572000000002b00": { i: WoodBass },
+        "0f300050001a171a1f1f1f1d01000106000f010b113117f1000000003e00": { i: 16, v: 1, o: -1 },
+      }
+      // autoMap controls the fallback voice if no match is found in the mapping table.
+      // - An appropriate ROM voice will be selected if autoMap is true.
+      // - Slient if autoMap is false.
+      autoMap: true,
+    }
+  }
+};
+```
+
+The original mapping can be seen on console after running `vgm-conv` without specifiying your voice table file. You can copy them into the template above.
+
