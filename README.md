@@ -18,7 +18,7 @@ vgm-conv supports non-trivial conversion across various chip types.
 |ym2203, ym2203.ssg|ay8910, ym3812, y8950, ym3526, ymf262|
 |ym2608, ym2608.ssg|ay8910|
 |ym2203, ym2203.fm|ym2413, ym3812, y8950, ym3526, ymf262|
-|ym2608, ym2608.fm|ym2413|
+|ym2608, ym2608.fm, ym2608.r|ym2413|
 |ym2612, ym2612.fm, ym2612.dac|ym2413|
 
 Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited thus don't expect much.
@@ -104,8 +104,7 @@ CHIP CONVERSION
   sn76489                         ay8910, ym2203, ym2608, ym2612                
   ym2413                          ym2608, ym3812, y8950, ym3526, ymf262         
   ym2203, ym2203.fm               ym2413                                        
-  ym2608, ym2608.fm               ym2413                                        
-  ym2608.fm_r, ym2608.r           ym2413                                        
+  ym2608, ym2608.fm, ym2608.r     ym2413                                        
   ym2203, ym2203.ssg              ay8910                                        
   ym2608, ym2608.ssg              ay8910                                        
   ym2612, ym2612.fm, ym2612.dac   ym2413                                   
