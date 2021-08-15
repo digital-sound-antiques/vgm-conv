@@ -239,29 +239,33 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       const d = Math.min(15, Math.max(0, vv));
       this._y(0x30 + ch, d);
     } else {
-      const d = Math.min(15, Math.max(0, vv));
-      switch (program >> 10) {
-        case 1: // HH
-          this._rVolumes.hh = d;
-          this._y(0x37, (this._rVolumes.hh << 4) | this._rVolumes.sd);
-          break;
-        case 2: // CYM
-          this._rVolumes.cym = d;
-          this._y(0x38, (this._rVolumes.tom << 4) | this._rVolumes.cym);
-          break;
-        case 4: // TOM
-          this._rVolumes.tom = d;
-          this._y(0x38, (this._rVolumes.tom << 4) | this._rVolumes.cym);
-          break;
-        case 8: // SD
-          this._rVolumes.sd = d;
-          this._y(0x37, (this._rVolumes.hh << 4) | this._rVolumes.sd);
-          break;
-        case 16: // BD
-          this._rVolumes.bd = d;
-          this._y(0x36, this._rVolumes.bd);
-          break;
-      }
+      this.updateRhythmVolume(program >> 10, vv);
+    }
+  }
+
+  updateRhythmVolume(r: number, vv: number) {
+    const v = Math.min(15, Math.max(0, vv));
+    switch (r) {
+      case 1: // HH
+        this._rVolumes.hh = v;
+        this._y(0x37, (this._rVolumes.hh << 4) | this._rVolumes.sd);
+        break;
+      case 2: // CYM
+        this._rVolumes.cym = v;
+        this._y(0x38, (this._rVolumes.tom << 4) | this._rVolumes.cym);
+        break;
+      case 4: // TOM
+        this._rVolumes.tom = v;
+        this._y(0x38, (this._rVolumes.tom << 4) | this._rVolumes.cym);
+        break;
+      case 8: // SD
+        this._rVolumes.sd = v;
+        this._y(0x37, (this._rVolumes.hh << 4) | this._rVolumes.sd);
+        break;
+      case 16: // BD
+        this._rVolumes.bd = v;
+        this._y(0x36, this._rVolumes.bd);
+        break;
     }
   }
 
@@ -339,9 +343,11 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     // select FM 6-ch mode
     this._y(14, 32);
     // set rhythm freq
-    this._y(0x16, 0x20);
-    this._y(0x17, 0x50);
-    this._y(0x18, 0xC0);
+    const goalClock = this.to.relativeClock ? (this.from.clock * this.to.clock) : (this.to.clock || 3579545);
+    const ratio = 3579545 / goalClock;
+    this._y(0x16, 0x20 * ratio);
+    this._y(0x17, 0x50 * ratio);
+    this._y(0x18, 0xC0 * ratio);
     this._y(0x26, 0x05);
     this._y(0x27, 0x05);
     this._y(0x28, 0x01);
