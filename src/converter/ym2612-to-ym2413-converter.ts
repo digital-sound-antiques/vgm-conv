@@ -12,6 +12,7 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
     this._dacEmulation = this.opts.dacEmulation ||
       this.opts.voiceTable?.opn2opll?.dacEmulation ||
       this._dacEmulation;
+    console.log(this._dacEmulation);
   }
 
   getInitialCommands(): Array<VGMCommand> {
@@ -97,7 +98,7 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
         this._y(16 + this.rootPcmChannel, vv, false);
         this._y(17 + this.rootPcmChannel, vv, false);
         this._y(18 + this.rootPcmChannel, vv, false);
-      } else if (this.opts._dacEmulation === "fmpcm") {
+      } else if (this._dacEmulation === "fmpcm") {
         const idx = Math.min(768, v * 4) & 0x3f8;
         const vs = YM2413DACTable[idx];
         for (let i = 0; i < 3; i++) {
