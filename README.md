@@ -86,7 +86,7 @@ OPTIONS
   -o, --output file         Output VGM file. The standard output is used if not speicified. If the given  
                             file is *.vgz, the output will be compressed.                                 
   --no-gd3                  Remove GD3 tag from output.
-  --voiceTable file         Specify the voice table file.  
+  --voice-table file        Specify the voice table file.  
   -v, --version             Show version.                                                    
   -h, --help                Show this help.                                                               
 
@@ -138,7 +138,7 @@ EXAMPLES
 ```
 
 # Voice Table (Beta)
-The voice table configuration can be defined in JavaScript. Only OPN/OPNA/OPN2 to OPLL conversions are supported. To load the voice table configuration, use `--voiceTable <file>` option.
+The voice table configuration can be defined in JavaScript. Only OPN/OPNA/OPN2 to OPLL conversions are supported. To load the voice table configuration, use `--voice-table <file>` option.
 
 ```voice-table.js
 const [HH, CYM, TOM, SD, BD] = [1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14];

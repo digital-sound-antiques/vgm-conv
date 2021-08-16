@@ -50,9 +50,15 @@ const optionDefinitions = [
     type: Boolean
   },
   {
-    name: "voiceTable",
+    name: "voice-table",
     typeLabel: "{underline file}",
     description: "Specify the voice table file in JavaScript.",
+    type: String
+  },
+  {
+    name: "voiceTable",
+    typeLabel: "{underline file}",
+    description: "(deprecated) Specify the voice table file in JavaScript.",
     type: String
   },
   {
@@ -189,7 +195,7 @@ function parseValue(text: string): boolean | string | number {
   return text;
 }
 
-function parseDefines(defs: Array<string>): { [key:string]: any } {
+function parseDefines(defs: Array<string>): { [key: string]: any } {
   const res: any = {};
   for (const def of defs || []) {
     const nv = def.split("=");
@@ -219,6 +225,7 @@ const defaultClocks: { [key: string]: number } = {
 
 function main(argv: string[]) {
   const options = commandLineArgs(optionDefinitions, { argv });
+  options.voiceTable = options["voice-table"] || options.voiceTable;
 
   if (options.version) {
     const json = require("../package.json");
@@ -267,12 +274,11 @@ function main(argv: string[]) {
 
   try {
     const opts = parseDefines(options.define);
-
-    if(options.voiceTable) {
+    if (options.voiceTable) {
       try {
-      const { voiceTable } = require(path.resolve(options.voiceTable));
-      opts["voiceTable"] = voiceTable;
-      } catch(e) {
+        const { voiceTable } = require(path.resolve(options.voiceTable));
+        opts["voiceTable"] = voiceTable;
+      } catch (e) {
         console.error("Error in loading voice table.");
         throw e;
       }
