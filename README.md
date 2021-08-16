@@ -27,7 +27,7 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 - A saw like preset is used for all FM channels on YM2612 to YM2413 conversion.
 - YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
 - YM2608 to YM2203 does not support the rhythm part conversion.
-- SN76489 to AY8910 conversion ignores the noise channel.
+- SN76489 to AY8910: Noise channel conversion is pertially supported; SN76489 has the independent noice channel but AY8910 does not, so full conversion is not possible. 
 - As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
 - Dual chip is not supported.
 
