@@ -95,7 +95,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _updateNoise(data: number) {
     if (data & 4) {
       // periodic noise
-      this._y(6, 31);
+      this._y(6, ([7, 15, 31, (this._freq[2] >> 4) & 31][data & 3]));
     } else {
       // white noise
       this._y(6, ([7, 15, 31, (this._freq[2] >> 4) & 31][data & 3]));
