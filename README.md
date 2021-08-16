@@ -127,9 +127,9 @@ EXAMPLES
 ```
 
 # Voice Table (Beta)
-The voice table file can be defined in JavaScript. Only OPN to OPLL conversion is supported.
+The voice table configuration can be defined in JavaScript. Only OPN/OPNA/OPN2 to OPLL conversions are supported. To load the voice table configuration, use `--voiceTable <file>` option.
 
-```voice.js
+```voice-table.js
 const [HH, CYM, TOM, SD, BD] = [1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14];
 const [Violin, Piano, Guitar, Flute, Clarinet, Oboe, Trumpet, Organ, Horn, Synthsizer, Harpsicode, Vibraphone, SynthBass, WoodBass, ElectricBass] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
@@ -164,5 +164,5 @@ module.exports = {
 };
 ```
 
-The original mapping can be seen on console after running `vgm-conv` without specifiying your voice table file. You can copy them into the template above.
+The original instrument hash to the program number mapping can be seen on the console after running `vgm-conv` without specifiying `--voiceTable`. You can copy them into the template above.
 
