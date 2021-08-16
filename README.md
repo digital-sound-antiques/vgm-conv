@@ -117,6 +117,16 @@ YM2612 to YM2413 OPTIONS
                                    test:  use YM2413 test mode is used 7.5bit DAC but disables all YM2413 FM channels.
                                    none:  disable DAC emulation.
 
+SN76489 to AY8910 OPTIONS
+
+  -D mixChannel=none|0|1|2        Specify the AY8910 channel used for noise output (default: 2). If 'none' is specified, all noise part will be silent.                                                                                                                                                                                         
+                                  Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the 
+                                  single AY8910's channel specified by this option.                                                                                                                                           
+  -D mixResolver=tone|noise|mix   This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.                                                                                                                                                                                 
+                                  tone: tone will be output. noise will be silent.                                                                                                                                                                                                                                                              
+                                  noise: noise will be output. tone will be silent.                                                                                                                                                                                                                                                             
+                                  mix: both tone and noise will be output (default).  
+
 EXAMPLES
 
   YM2612 to YM2413                                    $ vgm-conv -f ym2612 -t ym2413 input.vgm                                                 

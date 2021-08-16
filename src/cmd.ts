@@ -123,6 +123,24 @@ const sections = [
     ]
   },
   {
+    header: "SN76489 to AY8910 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} mixChannel={underline none|0|1|2}",
+        desc:
+          `Specify the AY8910 channel used for noise output (default: 2). If 'none' is specified, all noise part will be silent.
+           Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.`
+      },
+      {
+        def: "{bold -D} mixResolver={underline tone|noise|mix}",
+        desc: `This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.
+               tone: tone will be output. noise will be silent.
+               noise: noise will be output. tone will be silent.
+               mix: both tone and noise will be output (default).`
+      }
+    ]
+  },
+  {
     header: "EXAMPLES",
     content: [
       {
@@ -149,7 +167,7 @@ const sections = [
   }
 ];
 
-const defineKeys = ["decimation", "dacEmulation", "ws"];
+const defineKeys = ["decimation", "dacEmulation", "ws", "mixResolver", "mixChannel"];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
