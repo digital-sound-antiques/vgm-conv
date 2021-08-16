@@ -26,7 +26,9 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 ## Limitation
 - YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
 - YM2608 to YM2203 does not support the rhythm part conversion.
-- SN76489 to AY8910: Noise channel conversion is pertially supported; SN76489 has the independent noice channel but AY8910 does not, so full conversion is not possible. 
+- SN76489 to AY8910
+    - Noise channel conversion is pertially supported; SN76489 has the independent noice channel but AY8910 does not, so full conversion is not possible. 
+    - Periodic noise is converted to white noise.
 - As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
 - Dual chip is not supported.
 
@@ -163,7 +165,7 @@ module.exports = {
         "0f30005000120f121f1f1f1d01000106000f010b113117f1000000003e00": { i: SD, v: -1, o: -1 },
         "3e5051501f171c10df1bdf1f07070e040701010154f65572000000002b00": { i: WoodBass },
         "0f300050001a171a1f1f1f1d01000106000f010b113117f1000000003e00": { i: 16, v: 1, o: -1 },
-      }
+      },
       // autoMap controls the fallback voice if no match is found in the mapping table.
       // - An appropriate ROM voice will be selected if autoMap is true.
       // - Slient if autoMap is false.
