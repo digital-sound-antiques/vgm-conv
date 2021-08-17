@@ -147,7 +147,7 @@ The voice table configuration can be defined in JavaScript. Only OPN/OPNA/OPN2 t
 
 ```voice-table.js
 const [HH, CYM, TOM, SD, BD] = [1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14];
-const [Violin, Piano, Guitar, Flute, Clarinet, Oboe, Trumpet, Organ, Horn, Synthsizer, Harpsicode, Vibraphone, SynthBass, WoodBass, ElectricBass] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const [Violin, Piano, Guitar, Flute, Clarinet, Oboe, Trumpet, Organ, Horn, Synthsizer, Harpsichord, Vibraphone, SynthBass, WoodBass, ElectricBass] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
 module.exports = {
   voiceTable: {
@@ -166,7 +166,7 @@ module.exports = {
         // - 1024: HiHat, 2048: Cymbal, 4096: Tom, 8192: Snare, 16384: Bassdrum
         // v: Volume offset: -15<=v<=15 (default: 0)
         // o: Octave offset: -7<=o<=7 (default: 0)
-        "520030001c1f257fdf1fdf1f0709068607060608251515f5000000000100": { i: Harpsicode, v: 1, o: -1 },
+        "520030001c1f257fdf1fdf1f0709068607060608251515f5000000000100": { i: Harpsichord, v: 1, o: -1 },
         "0f30005000120f121f1f1f1d01000106000f010b113117f1000000003e00": { i: SD, v: -1, o: -1 },
         "3e5051501f171c10df1bdf1f07070e040701010154f65572000000002b00": { i: WoodBass },
         "0f300050001a171a1f1f1f1d01000106000f010b113117f1000000003e00": { i: 16, v: 1, o: -1 },
