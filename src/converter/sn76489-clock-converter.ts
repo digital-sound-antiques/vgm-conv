@@ -10,7 +10,7 @@ export class SN76489ClockConverter extends VGMClockConverter {
   _ratio = 0;
 
   constructor(from: ChipInfo, toClock: number, opts: any) {
-    super(from, toClock, 3579545 / 2);
+    super(from, toClock, 3579545);
     this._ratio = this.to.clock / from.clock;
   }
 
