@@ -18,7 +18,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _mixChannel = 2; // the index of the channel which shared with tone and noise.
   _mixResolver: _MixResolver = "mix";
   _periodicNoiseAssignment: _PeriodicNoiseAssignment = "tone";
-  _periodicNoisePitchShift: number = 5;
+  _periodicNoisePitchShift: number = 4;
   _periodicNoiseVolume: number = 0;
   _noiseVolume: number = 0;
   _periodic = false;

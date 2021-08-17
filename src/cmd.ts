@@ -156,7 +156,7 @@ const sections = [
       },
       {
         def: "{bold -D} periodicNoisePitchShift={underline n}",
-        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 5.`
+        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 4.`
       },
       {
         def: "{bold -D} periodicNoiseVolume={underline n}",
