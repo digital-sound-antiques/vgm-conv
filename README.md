@@ -27,8 +27,8 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 - YM2413 to YM2608 supports FM1-6 and rhythm conversion. FM7,8,9 channels are ignored.
 - YM2608 to YM2203 does not support the rhythm part conversion.
 - SN76489 to AY8910
-    - Noise channel conversion is pertially supported; SN76489 has the independent noice channel but AY8910 does not, so full conversion is not possible. 
-    - Periodic noise is converted to white noise.
+    - Noise conversion is pertially supported; SN76489 has the independent noice channel and the periodic noise generator but AY8910 does not,
+      so full conversion is not possible. 
 - As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
 - Dual chip is not supported.
 
@@ -120,13 +120,15 @@ YM2612 to YM2413 OPTIONS
 
 SN76489 to AY8910 OPTIONS
 
-  -D mixChannel=none|0|1|2        Specify the AY8910 channel used for noise output (default: 2). If 'none' is specified, all noise part will be silent.                                                                                                                                                                                         
-                                  Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the 
-                                  single AY8910's channel specified by this option.                                                                                                                                           
-  -D mixResolver=tone|noise|mix   This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.                                                                                                                                                                                 
-                                  tone: tone will be output. noise will be silent.                                                                                                                                                                                                                                                              
-                                  noise: noise will be output. tone will be silent.                                                                                                                                                                                                                                                             
-                                  mix: both tone and noise will be output (default).  
+  -D mixChannel=value                Specify the AY8910 channel used for noise output. The value must be one of 0, 1, 2 or none. The default value is 2.                                                        
+                                     If 'none' is specified, all noise part will be silent.                                                                                                                     
+                                     Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.        
+  -D mixResolver=tone|noise|mix      This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.                                              
+                                     'tone': tone will be output. noise will be silent.                                                                                                                         
+                                     'noise': noise will be output. tone will be silent.                                                                                                                        
+                                     'mix': both tone and noise will be output (default).                                                                                                                       
+  -D periodicNoiseAssignment=value   Specify the target to which SN76489's periodic noise will be converted. The value must be one of 'tone', 'noise', 'mix' or 'none'. The default value is 'tone'.            
+                                     If 'none' is specified, the periodic noise will be muted.
 
 EXAMPLES
 
