@@ -302,7 +302,7 @@ function main(argv: string[]) {
 
   try {
     const opts = parseDefines(options.define);
-    console.log(opts);
+
     if (options.voiceTable) {
       try {
         const { voiceTable } = require(path.resolve(options.voiceTable));
