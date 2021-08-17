@@ -17,6 +17,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _mixChannel = 2; // the index of the channel which shared with tone and noise.
   _mixResolver: _MixResolver = "mix";
   _periodicNoiseAssignment: _PeriodicNoiseAssignment = "tone";
+  _periodicNoisePitchShift: number = 3;
   _periodic = false;
   _noiseFreq = 0;
 
@@ -27,6 +28,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       mixChannel?: _MixChannel,
       mixResolver?: _MixResolver,
       periodicNoiseAssignment?: _PeriodicNoiseAssignment,
+      periodicNoisePitchShift?: number,
     },) {
     super(from, { chip: "ay8910", index: from.index, clock: 1 / 2, relativeClock: true });
     if (opts.mixChannel === "none") {
@@ -36,6 +38,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     }
     this._mixResolver = opts.mixResolver || this._mixResolver;
     this._periodicNoiseAssignment = opts.periodicNoiseAssignment || this._periodicNoiseAssignment;
+    this._periodicNoisePitchShift = opts.periodicNoisePitchShift || this._periodicNoisePitchShift;
   }
 
   _y(a: number, d: number) {
@@ -93,12 +96,15 @@ export class SN76489ToAY8910Converter extends VGMConverter {
           case "none":
             enableNoise = false;
             break;
-          case "tone":
-            enableTone = true;
-            enableNoise = false;
+          case "noise":
             break;
           case "mix":
             enableTone = true;
+            break;
+          case "tone":
+          default:
+            enableTone = true;
+            enableNoise = false;
             break;
         }
       }
@@ -136,6 +142,22 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     this._y(6, ([7, 15, 31, this._freq[2] & 31][data & 3]));
   }
 
+  _updateFreq(ch: number) {
+    if (ch < 3) {
+      let freq = this._freq[ch];
+      if (ch == this._mixChannel && this._noiseFreq == 3) {
+        if (this._atts[3] != 0xf && (this._atts[ch] == 0x0f || this._mixResolver == "noise")) {
+          freq = Math.min(0xfff, this._freq[2] << this._periodicNoisePitchShift);
+        }
+      }
+      this._y(ch * 2, freq & 0xff);
+      this._y(ch * 2 + 1, freq >> 8);
+    }
+    if (ch != this._mixChannel) {
+      this._updateFreq(this._mixChannel);
+    }
+  }
+
   _convert(cmd: VGMWriteDataCommand): Array<VGMCommand> {
     const { data } = cmd;
 
@@ -148,13 +170,12 @@ export class SN76489ToAY8910Converter extends VGMConverter {
         this._updateAttenuation(ch, data & 0xf);
       } else {
         if (ch < 3) {
-          const new_freq = (this._freq[ch] & 0x3f0) | (data & 0xf);
-          this._y(ch * 2, new_freq & 0xff);
-          this._freq[ch] = new_freq;
+          this._freq[ch] = (this._freq[ch] & 0x3f0) | (data & 0xf);
         } else {
           this._updateNoise(data);
         }
       }
+      this._updateFreq(ch);
     } else {
       const ch = this._ch;
       const type = this._type;
@@ -162,14 +183,12 @@ export class SN76489ToAY8910Converter extends VGMConverter {
         this._updateAttenuation(ch, data & 0xf);
       } else {
         if (ch < 3) {
-          const new_freq = ((data & 0x3f) << 4) | (this._freq[ch] & 0xf);
-          this._y(ch * 2, new_freq & 0xff);
-          this._y(ch * 2 + 1, new_freq >> 8);
-          this._freq[ch] = new_freq;
+          this._freq[ch] = ((data & 0x3f) << 4) | (this._freq[ch] & 0xf);
         } else {
           this._updateNoise(data);
         }
       }
+      this._updateFreq(ch);
     }
     return this._buf.commit();
   }

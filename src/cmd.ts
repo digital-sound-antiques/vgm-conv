@@ -149,6 +149,10 @@ const sections = [
         def: "{bold -D} periodicNoiseAssignment={underline value}",
         desc: `Specify the target to which SN76489's periodic noise will be converted. The value must be one of 'tone', 'noise', 'mix' or 'none'. The default value is 'tone'.
                If 'none' is specified, the periodic noise will be muted.`
+      },
+      {
+        def: "{bold -D} periodicNoisePitchShift={underline n}",
+        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 3.`
       }
     ]
   },
@@ -179,7 +183,15 @@ const sections = [
   }
 ];
 
-const defineKeys = ["decimation", "dacEmulation", "ws", "mixResolver", "mixChannel", "periodicNoiseAssignment"];
+const defineKeys = [
+  "decimation", 
+  "dacEmulation", 
+  "ws", 
+  "mixResolver", 
+  "mixChannel", 
+  "periodicNoiseAssignment",
+  "periodicNoisePitchShift",
+];
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
