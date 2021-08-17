@@ -141,9 +141,9 @@ const sections = [
       {
         def: "{bold -D} mixResolver={underline tone|noise|mix}",
         desc: `This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.
-               'tone': tone will be output. noise will be silent.
-               'noise': noise will be output. tone will be silent.
-               'mix': both tone and noise will be output (default).`
+               - 'tone': tone will be output. noise will be silent.
+               - 'noise': noise will be output. tone will be silent.
+               - 'mix': both tone and noise will be output (default).`
       },
       {
         def: "{bold -D} noiseVolume={underline n}",
@@ -151,8 +151,13 @@ const sections = [
       },
       {
         def: "{bold -D} periodicNoiseAssignment={underline value}",
-        desc: `Specify the target to which SN76489's periodic noise will be converted. The value must be one of 'tone', 'noise', 'mix' or 'none'. The default value is 'tone'.
-               If 'none' is specified, the periodic noise will be muted.`
+        desc: `Specify the target to which SN76489's periodic noise will be converted. The value must be one of the following:
+               - 'tone': square wave (default).
+               - 'noise': white noise. 
+               - 'mix': square wave + white nosie.
+               - 'env.tri': hardware triangle envelope. This will always make volume maximum.
+               - 'env.saw': hardware saw envelope. The will always make volume maximum.
+               - 'none': no output.`
       },
       {
         def: "{bold -D} periodicNoisePitchShift={underline n}",

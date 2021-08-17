@@ -7,7 +7,7 @@ const voltbl = [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 0];
 
 type _MixResolver = "tone" | "noise" | "mix";
 type _MixChannel = "none" | 0 | 1 | 2;
-type _PeriodicNoiseAssignment = "none" | "tone" | "noise" | "mix";
+type _PeriodicNoiseAssignment = "none" | "tone" | "noise" | "mix" | "env.tri" | "env.saw";
 
 export class SN76489ToAY8910Converter extends VGMConverter {
   _buf = new VGMWriteDataCommandBuffer(256, 1);
@@ -58,7 +58,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     }
   }
 
-  _y(a: number, d: number) {
+  _y(a: number, d: number, optimize: boolean = true) {
     const index = this.from.index;
     const addr = index === 0 ? a : a | 0x80;
     this._buf.push(
@@ -69,12 +69,20 @@ export class SN76489ToAY8910Converter extends VGMConverter {
         addr,
         data: d
       }),
-      false
+      optimize
     );
   }
 
   getInitialCommands(): Array<VGMCommand> {
     this._y(7, 0x38);
+    switch (this._periodicNoiseAssignment) {
+      case "env.saw":
+        this._y(13, 8);
+        break;
+      case "env.tri":
+        this._y(13, 14);
+        break;
+    }
     return this._buf.commit();
   }
 
@@ -107,6 +115,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       att = this._atts[noiseChannel];
     }
 
+    let env = false;
     if (this._periodic) {
       if (this._noiseFreq == 3) {
         if (enableNoise) {
@@ -119,6 +128,11 @@ export class SN76489ToAY8910Converter extends VGMConverter {
               break;
             case "mix":
               enableTone = true;
+              break;
+            case "env.tri":
+            case "env.saw":
+              env = true;
+              enableTone = enableNoise = false;
               break;
             case "tone":
             default:
@@ -137,7 +151,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     const toneMask = enableTone ? 0 : (1 << noiseChannel);
     const noiseMask = enableNoise ? (7 & ~(1 << noiseChannel)) : 7;
     this._y(7, noiseMask << 3 | toneMask);
-    this._y(8 + noiseChannel, voltbl[att]);
+    this._y(8 + noiseChannel, env ? 16 : voltbl[att]);
   }
 
   _updateAttenuation(ch: number, att: number) {
@@ -172,6 +186,20 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       if (ch == this._mixChannel && this._noiseFreq == 3) {
         if (this._atts[3] != 0xf && (this._atts[ch] == 0x0f || this._mixResolver == "noise")) {
           freq = Math.min(0xfff, this._freq[2] << this._periodicNoisePitchShift);
+          let mfreq = null;
+          switch (this._periodicNoiseAssignment) {
+            case "env.tri":
+              mfreq = (freq >> 5);
+              break;
+            case "env.saw": {
+              mfreq = (freq >> 4);
+              break;
+            }
+          }
+          if (mfreq != null) {
+            this._y(11, mfreq & 0xff);
+            this._y(12, mfreq >> 8);
+          }
         }
       }
       this._y(ch * 2, freq & 0xff);
