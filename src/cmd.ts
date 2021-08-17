@@ -146,13 +146,21 @@ const sections = [
                'mix': both tone and noise will be output (default).`
       },
       {
+        def: "{bold -D} noiseVolume={underline n}",
+        desc: `Specify the volume offset to the white noise. The default value is 0.`
+      },
+      {
         def: "{bold -D} periodicNoiseAssignment={underline value}",
         desc: `Specify the target to which SN76489's periodic noise will be converted. The value must be one of 'tone', 'noise', 'mix' or 'none'. The default value is 'tone'.
                If 'none' is specified, the periodic noise will be muted.`
       },
       {
         def: "{bold -D} periodicNoisePitchShift={underline n}",
-        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 3.`
+        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 5.`
+      },
+      {
+        def: "{bold -D} periodicNoiseVolume={underline n}",
+        desc: `Specify the volume offset to the periodic noise. The default value is 0.`
       }
     ]
   },
@@ -191,6 +199,8 @@ const defineKeys = [
   "mixChannel", 
   "periodicNoiseAssignment",
   "periodicNoisePitchShift",
+  "periodicNoiseVolume",
+  "noiseVolume",
 ];
 
 function toArrayBuffer(b: Buffer) {
@@ -292,6 +302,7 @@ function main(argv: string[]) {
 
   try {
     const opts = parseDefines(options.define);
+    console.log(opts);
     if (options.voiceTable) {
       try {
         const { voiceTable } = require(path.resolve(options.voiceTable));

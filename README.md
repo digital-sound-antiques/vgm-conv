@@ -127,11 +127,12 @@ SN76489 to AY8910 OPTIONS
                                      'tone': tone will be output. noise will be silent.                                                                                                                         
                                      'noise': noise will be output. tone will be silent.                                                                                                                        
                                      'mix': both tone and noise will be output (default).                                                                                                                       
+  -D noiseVolume=n                   Specify the volume offset to the white noise. The default value is 0.                                                                                                                                          
   -D periodicNoiseAssignment=value   Specify the target to which SN76489's periodic noise will be converted. The value must be one of 'tone', 'noise', 'mix' or 'none'. The default value is 'tone'.            
                                      If 'none' is specified, the periodic noise will be muted.
   -D periodicNoisePitchShift=n       Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The     
                                      default value is 3.
-
+  -D periodicNoiseVolume=n           Specify the volume offset to the periodic noise. The default value is 0.  
 EXAMPLES
 
   YM2612 to YM2413                                    $ vgm-conv -f ym2612 -t ym2413 input.vgm                                                 
