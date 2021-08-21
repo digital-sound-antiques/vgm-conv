@@ -118,10 +118,10 @@ const sections = [
       {
         def: "{bold -D} decimation={underline n}",
         desc:
-          "Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 disables the feature and results the best playback quality. The default value is 4."
+          "Decimate 1 of {underline n} PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. {underline n}=0 disables the feature and results the best playback quality. The default value is 4."
       },
       {
-        def: "{bold -D} dacEmulation={underline fmpcm|test|none}",
+        def: "{bold -D} dacEmulation=fmpcm|test|none",
         desc: `fmpcm: use the pseudo 6-bit DAC emulation on FM channels is used (default).
                test:  use YM2413 test mode to realize 7.5bit DAC but this disables all FM channels.
                none:  disable DAC emulation (default).`
@@ -139,33 +139,41 @@ const sections = [
            Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.`
       },
       {
-        def: "{bold -D} mixResolver={underline tone|noise|mix}",
+        def: "{bold -D} mixResolver=tone|noise|mix",
         desc: `This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.
-               - 'tone': tone will be output. noise will be silent.
-               - 'noise': noise will be output. tone will be silent.
-               - 'mix': both tone and noise will be output (default).`
-      },
-      {
-        def: "{bold -D} noiseVolume={underline n}",
-        desc: `Specify the volume offset to the white noise. The default value is 0.`
+               - tone: tone will be output. noise will be silent.
+               - noise: noise will be output. tone will be silent.
+               - mix: both tone and noise will be output (default).`
       },
       {
         def: "{bold -D} periodicNoiseAssignment={underline value}",
-        desc: `Specify the target to which SN76489's periodic noise will be converted. The value must be one of the following:
-               - 'tone': square wave (default).
-               - 'noise': white noise. 
-               - 'mix': square wave + white nosie.
-               - 'env.tri': hardware triangle envelope. This will always make volume maximum.
-               - 'env.saw': hardware saw envelope. The will always make volume maximum.
-               - 'none': no output.`
+        desc: `Specify the target to which SN76489's periodic noise will be converted. The {underline value} must be one of the following:
+               - tone: square wave (default).
+               - noise: white noise. 
+               - mix: square wave + white nosie.
+               - env.tri: hardware triangle envelope. This will always make volume maximum.
+               - env.saw: hardware saw envelope. The will always make volume maximum.
+               - none: no output.`
       },
       {
         def: "{bold -D} periodicNoisePitchShift={underline n}",
-        desc: `Specify the pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the frequency. The default value is 4.`
+        desc: `The pitch shift amount of the periodic noise conversion. pow(2, -{underline n}) will be multiplied to the noise frequency. The default value is 4.`
       },
       {
-        def: "{bold -D} periodicNoiseVolume={underline n}",
-        desc: `Specify the volume offset to the periodic noise. The default value is 0.`
+        def: "{bold -D} channelAttenuationMap={underline n1},{underline n2},{underline n3},{underline n4}",
+        desc: `Volume attenuation mapping for SN76489 channels. {underline n1}, {underline n2}, ... {underline n4} correspond to SN76489's ch1, ch2, ... ch4 respectively. The default value is 0,0,0,0.`
+      },
+      {
+        def: "{bold -D} whiteNoiseAttenuation={underline n}",
+        desc: `Additional volume attenuation for the white noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`
+      },      
+      {
+        def: "{bold -D} periodicNoiseAttenuation={underline n}",
+        desc: `Additional volume attenuation for periodic noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`
+      },      
+      {
+        def: "{bold -D} noisePitchMap={underline n1},{underline n2},{underline n3}",
+        desc: `The noise frequency of AY8910. {underline n1}, {underline n2} and {underline n3} correspond to SN76489's noise frequency 0, 1 and 2 respectively. The default value is 7,15,31.`
       }
     ]
   },
@@ -196,23 +204,27 @@ const sections = [
   }
 ];
 
-const defineKeys = [
-  "decimation", 
-  "dacEmulation", 
-  "ws", 
-  "mixResolver", 
-  "mixChannel", 
-  "periodicNoiseAssignment",
-  "periodicNoisePitchShift",
-  "periodicNoiseVolume",
-  "noiseVolume",
-];
+const defineKeyTypeMap: { [key: string]: any } = {
+  "decimation": Number,
+  "dacEmulation": ["fmpcm", "test", "none"],
+  "mixResolver": ["tone", "noise", "mix"],
+  "mixChannel": Number,
+  "periodicNoiseAssignment": ["tone", "noise", "mix", "env.tri", "env.saw", "none"],
+  "periodicNoisePitchShift": Number,
+  "periodicNoiseAttenuation": Number,
+  "whiteNoiseAttenuation": Number,
+  "noiseFrequencyMap": Uint8Array,
+  "channelAttenuationMap": Uint8Array,
+};
 
 function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 }
 
-function parseValue(text: string): boolean | string | number {
+function parseValue(text: string): boolean | string | number | Array<any> {
+  if (text.indexOf(',') >= 0) {
+    return text.split(',');
+  }
   if (text === "true") {
     return true;
   }
@@ -233,12 +245,27 @@ function parseDefines(defs: Array<string>): { [key: string]: any } {
   for (const def of defs || []) {
     const nv = def.split("=");
     const key = nv[0];
-    if (defineKeys.indexOf(nv[0]) < 0) {
+    const keyType = defineKeyTypeMap[nv[0]];
+    if (keyType == null) {
       throw Error(`Unknown variable '${key}'`);
     } else if (nv.length < 2) {
       throw Error(`Missing value for '${key}'`);
     } else {
-      res[nv[0]] = parseValue(nv[1]);
+      const value = parseValue(nv[1]);
+      if (keyType instanceof Array) {
+        if ((keyType as Array<any>).indexOf(value) < 0) {
+          throw Error(`Invalid value for ${nv[0]}: ${nv[1]}`);
+        }
+        res[nv[0]] = value;
+      } else if (keyType === Uint8Array) {
+        if (value instanceof Array) {
+          res[nv[0]] = new Uint8Array(value as Array<any>);
+        } else {
+          throw Error(`Value for ${nv[0]} must be Array or integers.`);
+        }
+      } else {
+        res[nv[0]] = value;
+      }
     }
   }
   return res;
@@ -284,28 +311,28 @@ function main(argv: string[]) {
   const input = options.input || "/dev/stdin";
   const output = options.output;
 
-  const buf = fs.readFileSync(input);
-  const vgm = VGM.parse(toArrayBuffer(buf));
-
-  const fromCM = (options.from || options.to).split(".");
-  const fromChipName = fromCM[0];
-  const fromSubModule = fromCM[1];
-  const from = {
-    index: 0,
-    chip: fromChipName,
-    subModule: fromSubModule,
-    clock: ((vgm.chips as any)[fromChipName] || {}).clock || 0
-  };
-
-  const toCM = (options.to || options.from).split(".");
-  const toChipName = toCM[0];
-  const to = {
-    index: 0,
-    chip: toChipName,
-    clock: options.clock || defaultClocks[toChipName] || 0
-  };
-
   try {
+    const buf = fs.readFileSync(input);
+    const vgm = VGM.parse(toArrayBuffer(buf));
+
+    const fromCM = (options.from || options.to).split(".");
+    const fromChipName = fromCM[0];
+    const fromSubModule = fromCM[1];
+    const from = {
+      index: 0,
+      chip: fromChipName,
+      subModule: fromSubModule,
+      clock: ((vgm.chips as any)[fromChipName] || {}).clock || 0
+    };
+
+    const toCM = (options.to || options.from).split(".");
+    const toChipName = toCM[0];
+    const to = {
+      index: 0,
+      chip: toChipName,
+      clock: options.clock || defaultClocks[toChipName] || 0
+    };
+
     const opts = parseDefines(options.define);
 
     if (options.voiceTable) {

@@ -1,7 +1,6 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
-import { timeStamp } from "console";
 
 const voltbl = [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 0];
 
@@ -19,10 +18,12 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _mixResolver: _MixResolver = "mix";
   _periodicNoiseAssignment: _PeriodicNoiseAssignment = "tone";
   _periodicNoisePitchShift: number = 4;
-  _periodicNoiseVolume: number = 0;
-  _noiseVolume: number = 0;
+  _periodicNoiseAttenuation: number = 0;
+  _whiteNoiseAttenuation: number = 0;  
   _periodic = false;
   _noiseFreq = 0;
+  _noisePitchMap = [10, 15, 31];
+  _channelAttenuationMap = [0, 0, 0, 0];
 
   constructor(
     from: ChipInfo,
@@ -32,8 +33,10 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       mixResolver?: _MixResolver,
       periodicNoiseAssignment?: _PeriodicNoiseAssignment,
       periodicNoisePitchShift?: number,
-      periodicNoiseVolume?: number,
-      noiseVolume?: number,
+      noisePitchMap?: number[],
+      channelAttenuationMap?: number[],
+      whiteNoiseAttenuation?: number,
+      periodicNoiseAttenuation?: number,
     },) {
     super(from, { chip: "ay8910", index: from.index, clock: 1 / 2, relativeClock: true });
     if (opts.mixChannel != null) {
@@ -50,11 +53,17 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     if (opts.periodicNoisePitchShift != null) {
       this._periodicNoisePitchShift = opts.periodicNoisePitchShift;
     }
-    if (opts.noiseVolume != null) {
-      this._noiseVolume = opts.noiseVolume;
+    if (opts.noisePitchMap != null) {
+      this._noisePitchMap = opts.noisePitchMap;
     }
-    if (opts.periodicNoiseVolume != null) {
-      this._periodicNoiseVolume = opts.periodicNoiseVolume;
+    if (opts.channelAttenuationMap != null) {
+      this._channelAttenuationMap = opts.channelAttenuationMap;
+    }
+    if (opts.whiteNoiseAttenuation != null) {
+      this._whiteNoiseAttenuation = opts.whiteNoiseAttenuation;
+    }
+    if (opts.periodicNoiseAttenuation != null) {
+      this._periodicNoiseAttenuation = opts.periodicNoiseAttenuation;
     }
   }
 
@@ -119,7 +128,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     if (this._periodic) {
       if (this._noiseFreq == 3) {
         if (enableNoise) {
-          att = Math.max(0, Math.min(15, att - this._periodicNoiseVolume));
+          att = Math.max(0, Math.min(15, att + this._periodicNoiseAttenuation));
           switch (this._periodicNoiseAssignment) {
             case "none":
               enableNoise = false;
@@ -144,7 +153,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       }
     } else {
       if (enableNoise) {
-        att = Math.max(0, Math.min(15, att - this._noiseVolume));
+        att = Math.max(0, Math.min(15, att + this._whiteNoiseAttenuation));
       }
     }
 
@@ -154,7 +163,8 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     this._y(8 + noiseChannel, env ? 16 : voltbl[att]);
   }
 
-  _updateAttenuation(ch: number, att: number) {
+  _updateAttenuation(ch: number, rawAtt: number) {
+    const att = rawAtt == 0xf ? 0xf : Math.max(0, Math.min(15, rawAtt + this._channelAttenuationMap[ch]));
     this._atts[ch] = att;
     if (0 <= this._mixChannel) {
       if (ch === this._mixChannel || ch == 3) {
@@ -177,7 +187,11 @@ export class SN76489ToAY8910Converter extends VGMConverter {
       this._noiseFreq = noiseFreq;
       this._updateSharedChannel();
     }
-    this._y(6, ([7, 15, 31, this._freq[2] & 31][data & 3]));
+    if ((data & 3) == 3) {
+      this._y(6, this._freq[2] & 31);
+    } else {
+      this._y(6, this._noisePitchMap[data & 3]);
+    }
   }
 
   _updateFreq(ch: number) {
