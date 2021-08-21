@@ -22,7 +22,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _whiteNoiseAttenuation: number = 0;  
   _periodic = false;
   _noiseFreq = 0;
-  _noisePitchMap = [10, 15, 31];
+  _noisePitchMap = [7, 15, 31];
   _channelAttenuationMap = [0, 0, 0, 0];
 
   constructor(
