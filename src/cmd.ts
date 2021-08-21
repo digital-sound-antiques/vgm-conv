@@ -213,7 +213,7 @@ const defineKeyTypeMap: { [key: string]: any } = {
   "periodicNoisePitchShift": Number,
   "periodicNoiseAttenuation": Number,
   "whiteNoiseAttenuation": Number,
-  "noiseFrequencyMap": Uint8Array,
+  "noisePitchMap": Uint8Array,
   "channelAttenuationMap": Uint8Array,
 };
 
