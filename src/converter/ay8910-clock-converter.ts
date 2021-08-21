@@ -28,7 +28,7 @@ export class AY8910ClockConverter extends VGMClockConverter {
       } else if (addr === 6) {
         // noise freq
         const raw = this._regs[6] & 0x1f;
-        const adj = Math.min(0xfff, Math.round(raw * this._ratio));
+        const adj = Math.min(0x1f, Math.round(raw * this._ratio));
         return [cmd.copy({ data: adj })];
       } else if (addr == 11 || addr == 12) {
         // envelope freq
