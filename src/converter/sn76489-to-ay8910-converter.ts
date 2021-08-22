@@ -19,7 +19,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
   _periodicNoiseAssignment: _PeriodicNoiseAssignment = "tone";
   _periodicNoisePitchShift: number = 4;
   _periodicNoiseAttenuation: number = 0;
-  _whiteNoiseAttenuation: number = 0;  
+  _whiteNoiseAttenuation: number = 0;
   _periodic = false;
   _noiseFreq = 0;
   _noisePitchMap = [7, 15, 31];
@@ -194,7 +194,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     }
   }
 
-  _updateFreq(ch: number) {
+  _updateFreq(ch: number, optimize: boolean = true) {
     if (ch < 3) {
       let freq = this._freq[ch];
       if (ch == this._mixChannel && this._noiseFreq == 3) {
@@ -211,16 +211,16 @@ export class SN76489ToAY8910Converter extends VGMConverter {
             }
           }
           if (mfreq != null) {
-            this._y(11, mfreq & 0xff);
-            this._y(12, mfreq >> 8);
+            this._y(11, mfreq & 0xff, optimize);
+            this._y(12, mfreq >> 8, optimize);
           }
         }
       }
-      this._y(ch * 2, freq & 0xff);
-      this._y(ch * 2 + 1, freq >> 8);
+      this._y(ch * 2, freq & 0xff, optimize);
+      this._y(ch * 2 + 1, freq >> 8, optimize);
     }
     if (ch != this._mixChannel) {
-      this._updateFreq(this._mixChannel);
+      this._updateFreq(this._mixChannel, optimize);
     }
   }
 
@@ -240,8 +240,8 @@ export class SN76489ToAY8910Converter extends VGMConverter {
         } else {
           this._updateNoise(data);
         }
+        this._updateFreq(ch);
       }
-      this._updateFreq(ch);
     } else {
       const ch = this._ch;
       const type = this._type;
@@ -253,8 +253,8 @@ export class SN76489ToAY8910Converter extends VGMConverter {
         } else {
           this._updateNoise(data);
         }
+        this._updateFreq(ch);
       }
-      this._updateFreq(ch);
     }
     return this._buf.commit();
   }
@@ -265,4 +265,13 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     }
     return [cmd];
   }
+
+  getLoopCommands(): Array<VGMCommand> {
+    // Update all frequency registers on loop to avoid wrong optimization.
+    for (let ch = 0; ch < 3; ch++) {
+      this._updateFreq(ch, false);
+    }
+    return this._buf.commit();
+  }
+
 }

@@ -110,6 +110,9 @@ export function convert(input: VGM, converter: VGMConverter): VGM {
   while (true) {
     if (input.offsets.data + index === input.offsets.loop) {
       ds.markLoopPoint();
+      for (const e of converter.getLoopCommands()) {
+        ds.push(e);
+      }
     }
     const cmd = parseVGMCommand(data, index);
     if (cmd == null) {

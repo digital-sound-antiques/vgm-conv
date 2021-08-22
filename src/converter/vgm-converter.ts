@@ -22,6 +22,10 @@ export abstract class VGMConverter {
     return [];
   }
 
+  getLoopCommands(): Array<VGMCommand> {
+    return [];
+  }
+
   abstract convertCommand(cmd: VGMCommand): Array<VGMCommand>;
 
   get convertedChipInfo(): ChipInfo {
