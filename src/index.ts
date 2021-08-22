@@ -107,7 +107,7 @@ export function convert(input: VGM, converter: VGMConverter): VGM {
     ds.push(e);
   }
 
-  while (true) {
+  while (index < data.length) {
     if (input.offsets.data + index === input.offsets.loop) {
       ds.markLoopPoint();
       for (const e of converter.getLoopCommands()) {
