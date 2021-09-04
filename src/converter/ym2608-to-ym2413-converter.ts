@@ -41,32 +41,26 @@ export class YM2608ToYM2413Converter extends OPNToYM2413Converter {
       }
       if (cmd.addr == 0x18) { // BD
         const v = this._convertRhythmVolume(cmd.data, -4);
-        console.error(`bd: v${v}`);
         this.updateRhythmVolume(16, v);
       }
       if (cmd.addr == 0x19) { // SD
         const v = this._convertRhythmVolume(cmd.data, -4);
-        console.error(`sd: v${v}`);
         this.updateRhythmVolume(8, v);
       }
       if (cmd.addr == 0x1A) { // TOP
         const v = this._convertRhythmVolume(cmd.data, 0);
-        console.error(`top: v${v}`);
         this.updateRhythmVolume(2, v);
       }
       if (cmd.addr == 0x1B) { // HH
         const v = this._convertRhythmVolume(cmd.data, 2);
-        console.error(`hh: v${v}`);
         this.updateRhythmVolume(1, v);
       }
       if (cmd.addr == 0x1C) { // TOM
         const v = this._convertRhythmVolume(cmd.data, -4);
-        console.error(`tom: v${v}`);
         this.updateRhythmVolume(4, v);
       }
       if (cmd.addr == 0x1D) { // RIM
         const v = this._convertRhythmVolume(cmd.data, 0);
-        console.error(`rim: v${v}`);
         this.updateRhythmVolume(2, v);
       }
     }
@@ -94,6 +88,8 @@ export class YM2608ToYM2413Converter extends OPNToYM2413Converter {
       } else if (convertFM) {
         return this.convertFM(cmd);
       }
+    } else {
+      return super.convertCommand(cmd);
     }
     return [cmd];
   }

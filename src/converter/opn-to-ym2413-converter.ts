@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMEndCommand, VGMWriteDataCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPNVoice } from "ym-voice";
 
@@ -79,25 +79,25 @@ function _programString(program: number) {
     return program.toString();
   }
   const res = [];
-  if (program & (1<<10)) {
+  if (program & (1 << 10)) {
     res.push('HH');
   }
-  if (program & (1<<11)) {
+  if (program & (1 << 11)) {
     res.push('CYM');
   }
-  if (program & (1<<12)) {
+  if (program & (1 << 12)) {
     res.push('TOM');
   }
-  if (program & (1<<13)) {
+  if (program & (1 << 13)) {
     res.push('SD');
   }
-  if (program & (1<<14)) {
+  if (program & (1 << 14)) {
     res.push('BD');
   }
   return res.join('|');
 }
 
-function _volumeMapEntryString(voice: VoiceDefinition) {
+function _voiceMapEntryString(voice: VoiceDefinition) {
   const res = [`i:${_programString(voice.program)}`];
   if (voice.volumeOffset != 0) {
     res.push(`v:${-voice.volumeOffset}`);
@@ -108,17 +108,28 @@ function _volumeMapEntryString(voice: VoiceDefinition) {
   return `{${res.join(',')}}`;
 }
 
+function _voiceMapEntryToVoiceDefinition(e: VoiceMapEntry): VoiceDefinition {
+  return {
+    program: e.i,
+    volumeOffset: (e.v != null) ? -(e.v) : 0,
+    octaveOffset: e.o || 0,
+  };
+}
+
 export abstract class OPNToYM2413Converter extends VGMConverter {
 
   _userVoices: { [key: number]: number[] } = {
     0: [0x01, 0x01, 0x1c, 0x07, 0xf0, 0xd7, 0x00, 0x11],
   }
+
   /** instrument data to voice and volue offset (attenuation) */
-  _voiceMap: { [key: string]: VoiceMapEntry } = {
-    "000000000000000000000000000000000000000000000000000000000000": { i: 1, v: -15, o: 0 },
+  _voiceDefMap: { [key: string]: VoiceDefinition } = {
+    "000000000000000000000000000000000000000000000000000000000000": { program: 1, volumeOffset: 15, octaveOffset: 0 },
   };
+  _voiceInfoMap: { [key: string]: { opnVoice: OPNVoice, channels: Set<number> } } = {};
+
   _autoMap = true;
-  _voiceHashMap: { [key: string]: OPNVoice } = {};
+
   _currentVoice: (VoiceDefinition & { hash: string })[] = [
     { hash: "", ...fallback_voice },
     { hash: "", ...fallback_voice },
@@ -142,25 +153,19 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     if (this.opts.voiceTable && this.opts.voiceTable.opn2opll) {
       const { opn2opll } = this.opts.voiceTable;
       this._userVoices = { ...this._userVoices, ...opn2opll.voices };
-      this._voiceMap = { ...this._voiceMap, ...opn2opll.mapping };
+
+      const { mapping } = opn2opll;
+      if (mapping != null) {
+        for (let key in mapping) {
+          this._voiceDefMap[key] = _voiceMapEntryToVoiceDefinition(mapping[key]);
+        }
+      }
       this._autoMap = opn2opll.autoMap != null ? opn2opll.autoMap : this._autoMap;
     }
   }
 
   _estimateOPLLVoice(opn: OPNVoice): VoiceDefinition {
     return opn.toOPL()[0].toOPLLROMVoice();
-  }
-
-  _getOPLLVoiceFromMap(hash: string): VoiceDefinition | null {
-    const e = this._voiceMap[hash];
-    if (e) {
-      return {
-        program: e.i,
-        volumeOffset: -(e.v || 0),
-        octaveOffset: e.o || 0,
-      };
-    }
-    return null;
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
@@ -174,7 +179,6 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     const nch = ch < 3 ? ch : (ch + 1) & 3;
     const regs = this._regs[port];
 
-    // prettier-ignore
     const rawVoice = [
       regs[0x30 + nch], regs[0x34 + nch], regs[0x38 + nch], regs[0x3c + nch],
       regs[0x40 + nch], regs[0x44 + nch], regs[0x48 + nch], regs[0x4c + nch],
@@ -185,20 +189,29 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       regs[0x90 + nch], regs[0x94 + nch], regs[0x98 + nch], regs[0x9c + nch],
       (regs[0xb0 + nch] & 0x3f), (regs[0xb4 + nch] & 0x37)
     ];
-    const nextHash = rawVoice.map(e => ("0" + e.toString(16)).slice(-2)).join("");
-    const prevVoice = this._currentVoice[ch];
-    if (nextHash != prevVoice.hash) {
-      const isNew = this._voiceHashMap[nextHash] == null;
-      const opnVoice = OPNVoice.decode(rawVoice);
-      this._voiceHashMap[nextHash] = opnVoice;
-      const voice = this._getOPLLVoiceFromMap(nextHash) || (this._autoMap ? this._estimateOPLLVoice(opnVoice) : fallback_voice);
-      if (isNew) {
-        console.error(`"${nextHash}":${_volumeMapEntryString(voice)}, // CH${ch}`);
+    const hash = _normalizeTotalLevel(rawVoice).map(e => ("0" + e.toString(16)).slice(-2)).join("");
+    const prevHash = this._currentVoice[ch].hash;
+
+    if (hash != prevHash) {
+      let voiceInfo = this._voiceInfoMap[hash];
+      if (voiceInfo == null) {
+        const opnVoice = OPNVoice.decode(rawVoice);
+        voiceInfo = this._voiceInfoMap[hash] = {
+          opnVoice,
+          channels: new Set<number>(),
+        };
       }
-      this._currentVoice[ch] = {
-        hash: nextHash,
-        ...voice,
-      };
+      voiceInfo.channels.add(ch);
+
+      let vdef = this._voiceDefMap[hash];
+      if (vdef == null) {
+        if (this._autoMap) {
+          vdef = this._estimateOPLLVoice(voiceInfo.opnVoice);
+        }
+        vdef ||= fallback_voice;
+        this._voiceDefMap[hash] = vdef;
+      }
+      this._currentVoice[ch] = { hash, ...vdef };
     }
   }
 
@@ -206,9 +219,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     const regs = this._regs[port];
     const ch = nch + port * 3;
     const alg = regs[0xb0 + nch] & 7;
-    if (this._currentVoice[ch].hash == "") {
-      this._identifyVoice(ch);
-    }
+
     const { program, volumeOffset } = this._currentVoice[ch];
     const amps = [regs[0x40 + nch] & 0x7f, regs[0x44 + nch] & 0x7f, regs[0x48 + nch] & 0x7f, regs[0x4c + nch] & 0x7f];
     let vol; // 7f * 4
@@ -235,6 +246,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       const v = this._userVoices[program] || this._userVoices[0];
       for (let i = 0; i < v.length; i++) {
         this._y(i, v[i]);
+
       }
       const d = Math.min(15, Math.max(0, vv));
       this._y(0x30 + ch, d);
@@ -282,10 +294,10 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
           if (key != this._keyFlags[ch]) {
             if (key) {
               this._identifyVoice(ch);
-              this._updateInstVol(cmd.port, nch);
             }
           }
-          const { program, octaveOffset } = this._currentVoice[ch];
+          this._updateInstVol(cmd.port, nch);
+          const { hash, program, octaveOffset } = this._currentVoice[ch];
 
           if (program >= MAX_VOICES) {
             if (key) {
@@ -309,7 +321,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       }
     }
 
-    if (0x40 <= adr && adr <= 0x4f) {
+    if (0x40 <= adr && adr <= 0x4f) { // Total Level
       const nch = adr & 3;
       if (nch !== 3) {
         this._updateInstVol(cmd.port, nch);
@@ -322,7 +334,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       const al = 0xa0 + nch;
       const ah = 0xa4 + nch;
       const fnum = (((regs[ah] & 7) << 8) | regs[al]) >> 2;
-      const { program, octaveOffset } = this._currentVoice[ch];
+      const { hash, program, octaveOffset } = this._currentVoice[ch];
       const blk = ((regs[ah] >> 3) & 7);
       const blk_o = Math.min(7, Math.max(0, octaveOffset + blk));
       const key = program >= 1024 ? 0 : this._keyFlags[ch];
@@ -371,6 +383,14 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
           return this.convertFM(cmd);
         }
       }
+    } else if (cmd instanceof VGMEndCommand) {
+      for (let hash in this._voiceInfoMap) {
+        const { opnVoice, channels } = this._voiceInfoMap[hash];
+        const vdef = this._voiceDefMap[hash];
+        console.error(`/*${opnVoice.toMML("mucom88")}*/`);
+        console.error(`"${hash}":${_voiceMapEntryString(vdef)}, // Used in CH:${Array.from(channels)}`);
+      }
+      return [cmd];
     }
     return [cmd];
   }

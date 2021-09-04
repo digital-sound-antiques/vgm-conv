@@ -132,7 +132,7 @@ export function convert(input: VGM, converter: VGMConverter): VGM {
     ds.push(e);
   }
 
-  while (index < data.length) {
+  while (true) {
     if (input.offsets.data + index === input.offsets.loop) {
       ds.markLoopPoint();
       for (const e of converter.getLoopCommands()) {
@@ -148,6 +148,13 @@ export function convert(input: VGM, converter: VGMConverter): VGM {
     }
     index += cmd.size;
     if (cmd instanceof VGMEndCommand) {
+      break;
+    }
+    if (data.length <= index) {
+      // convert dummy VGMEndCommand
+      for (const e of converter.convert(new VGMEndCommand())) {
+        ds.push(e);
+      }
       break;
     }
   }

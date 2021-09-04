@@ -91,7 +91,7 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
     const v = this._pcmData[this._pcmIndex];
     this._pcmIndex++;
 
-    if (this.opts.decimation <= 1 || this._div % this.opts.decimation !== 0) {
+    if (this.opts.decimation <= 1 || this._div % this.opts.decimation == 0) {
       if (this._dacEmulation === "test") {
         const vv = 47 + Math.round((208 * v) / 255);
         this._y(16 + this.rootPcmChannel, vv, false);
@@ -139,21 +139,20 @@ export class YM2612ToYM2413Converter extends OPNToYM2413Converter {
         }
         return [];
       }
-    }
-    if (cmd instanceof VGMDataBlockCommand && cmd.chip === "ym2612") {
+    } else if (cmd instanceof VGMDataBlockCommand && cmd.chip === "ym2612") {
       if (convertDAC) {
         return this.convertDataBlock(cmd);
       }
-    }
-    if (cmd instanceof VGMWrite2ACommand) {
+    } else if (cmd instanceof VGMWrite2ACommand) {
       if (convertDAC) {
         return this.convert2A(cmd);
       }
-    }
-    if (cmd instanceof VGMSeekPCMCommand) {
+    } else if (cmd instanceof VGMSeekPCMCommand) {
       if (convertDAC) {
         return this.convertSeekPCM(cmd);
       }
+    } else {
+      return super.convertCommand(cmd);
     }
     return [cmd];
   }
