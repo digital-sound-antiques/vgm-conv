@@ -5,7 +5,7 @@ Chip-type and clock converter for VGM.
 
 # Clock Conversion
 vgm-conv can change chip's clock while maintaining note's frequency. 
-Supported chips are sn76489, ay8910, ym2203, ym2608, ym3812, y8950, ym3526, ymf262 and ym2413.
+Supported chips are sn76489, ay8910, ym2151, ym2203, ym2608, ym3812, y8950, ym3526, ymf262 and ym2413.
 
 # Type Conversion
 vgm-conv supports non-trivial conversion across various chip types.
@@ -94,7 +94,7 @@ CLOCK CONVERSION
 
   AVAILABLE CHIPS               
   sn76489, ym2612               
-  ay8910, ym2203, ym2608        
+  ay8910, ym2151, ym2203, ym2608        
   ym3812, ym3526, y8950, ymf262 
   ym2413                        
 
@@ -184,5 +184,5 @@ module.exports = {
 };
 ```
 
-The original instrument hash to the program number mapping can be seen on the console after running `vgm-conv` without specifiying `--voiceTable`. You can copy them into the template above.
+The original instrument hash to the program number mapping can be seen on the console after running `vgm-conv` without specifiying `--voice-table`. You can copy them into the template above.
 

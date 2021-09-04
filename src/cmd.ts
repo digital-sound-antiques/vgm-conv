@@ -93,7 +93,7 @@ const sections = [
     content: [
       { chip: "{bold AVAILABLE CHIPS}" },
       { chip: "sn76489, ym2612" },
-      { chip: "ay8910, ym2203, ym2608" },
+      { chip: "ay8910, ym2151, ym2203, ym2608" },
       { chip: "ym3812, ym3526, y8950, ymf262" },
       { chip: "ym2413" }
     ]

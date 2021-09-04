@@ -16,6 +16,7 @@ import { YM2608ToYM2413Converter } from "./converter/ym2608-to-ym2413-converter"
 import { YM2612ToYM2413Converter } from "./converter/ym2612-to-ym2413-converter";
 import { YM2203ToAY8910Converter, YM2608ToAY8910Converter } from "./converter/ssg-to-ay8910-converter";
 import { YM2203ToOPLConverter } from "./converter/ym2203-to-opl-converter";
+import { OPMClockConverter } from "./converter/opm-clock-converter";
 
 export function getClockConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMConverter | null {
   if (to.chip === "ym3812" || to.chip === "y8950" || to.chip === "ym3526" || to.chip === "ymf262") {
@@ -38,6 +39,9 @@ export function getClockConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMCo
   }
   if (to.chip === "sn76489") {
     return new SN76489ClockConverter(from, to.clock, opts);
+  }
+  if (to.chip === "ym2151") {
+    return new OPMClockConverter(from, to.clock, opts);
   }
   return null;
 }
