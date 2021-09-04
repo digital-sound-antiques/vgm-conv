@@ -113,6 +113,15 @@ const sections = [
     ]
   },
   {
+    header: "YM2203 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS",
+    content: [
+      {
+        def: "{bold -D} ssgAttenuation={underline n}",
+        desc: "Set SSG volume attenuation level to 0.75*{underline n}(dB). The effective range is -63<={underline n}<=63."
+      }
+    ]
+  },
+  {
     header: "YM2612 to YM2413 OPTIONS",
     content: [
       {
@@ -215,6 +224,7 @@ const defineKeyTypeMap: { [key: string]: any } = {
   "whiteNoiseAttenuation": Number,
   "noisePitchMap": Uint8Array,
   "channelAttenuationMap": Uint8Array,
+  "ssgAttenuation": Number,
 };
 
 function toArrayBuffer(b: Buffer) {

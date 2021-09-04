@@ -108,7 +108,11 @@ CHIP CONVERSION
   ym2608, ym2608.fm, ym2608.r     ym2413                                        
   ym2203, ym2203.ssg              ay8910                                        
   ym2608, ym2608.ssg              ay8910                                        
-  ym2612, ym2612.fm, ym2612.dac   ym2413                                   
+  ym2612, ym2612.fm, ym2612.dac   ym2413                                        
+
+YM2203 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS
+
+  -D ssgAttenuation=n   Set SSG volume attenuation level to 0.75*n(dB). The effective range is -63<=n<=63.
 
 YM2612 to YM2413 OPTIONS
 

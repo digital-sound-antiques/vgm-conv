@@ -45,12 +45,16 @@ export class YM2203ToOPLConverter extends VGMConverter {
   _command: number;
   _keyStatus: Array<boolean> = [false, false, false, false, false, false]; // 0..2: FM1-3, 3..5: CH-3 SLOT
   _toClock: number;
+  _ssgAttenuation: number = 0;
 
-  constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
+  constructor(from: ChipInfo, to: ChipInfo, opts: { ssgAttenuation?: number}) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ymf262" ? 4 : 1, relativeClock: true });
     this._type = to.chip as _OPLType;
     this._command = type2cmd(this._type);
     this._toClock = this.convertedChipInfo.clock;
+    if (opts.ssgAttenuation != null) {
+      this._ssgAttenuation = opts.ssgAttenuation;
+    }
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
@@ -123,7 +127,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const n = ((8 << ch) & this._regs[0x7]) === 0;
     const v = this._regs[0x08 + ch];
     const vol = v & 0x10 ? 0 : v & 0xf;
-    const tl = Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf]);
+    const tl = Math.max(0, Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + this._ssgAttenuation));
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
