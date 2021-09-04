@@ -144,6 +144,8 @@ export default function convertVGM(input: VGM, from: ChipInfo, to: ChipInfo, opt
   if (cur.chip != to.chip) {
     const chipConverter = getChipConverter(cur, to, opts);
     if (chipConverter) {
+      vgm = convert(vgm, chipConverter);
+      cur = chipConverter.convertedChipInfo;
       const { clock } = chipConverter.convertedChipInfo;
       if (to.clock != clock) {
         const tmp = { ...cur, clock: (cur.clock * to.clock) / clock };
@@ -155,9 +157,6 @@ export default function convertVGM(input: VGM, from: ChipInfo, to: ChipInfo, opt
           throw new Error(`Clock converter for ${to.chip} is not implemented.`);
         }
       }
-      chipConverter.from = { ...from, clock: cur.clock };
-      vgm = convert(vgm, chipConverter);
-      cur = chipConverter.convertedChipInfo;
     } else {
       throw new Error(`Converter from ${cur.chip} to ${to.chip} is not implemented.`);
     }
