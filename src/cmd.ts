@@ -109,7 +109,9 @@ const sections = [
       { from: "ym2608, ym2608.fm, ym2608.r", to: "ym2413" },
       { from: "ym2203, ym2203.ssg", to: "ay8910" },
       { from: "ym2608, ym2608.ssg", to: "ay8910" },
-      { from: "ym2612, ym2612.fm, ym2612.dac", to: "ym2413" }
+      { from: "ym2612, ym2612.fm, ym2612.dac", to: "ym2413" },
+      { from: "ym3812", to: "y8950, ym3526" },
+      { from: "y8950, ym3526", to: "ym3812" },
     ]
   },
   {
@@ -379,7 +381,7 @@ function main(argv: string[]) {
     } else {
       process.stdout.write(res);
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error(e.message);
     process.exit(1);
   }

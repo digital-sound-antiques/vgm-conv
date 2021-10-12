@@ -20,6 +20,8 @@ vgm-conv supports non-trivial conversion across various chip types.
 |ym2203, ym2203.fm|ym2413, ym3812, y8950, ym3526, ymf262|
 |ym2608, ym2608.fm, ym2608.r|ym2413|
 |ym2612, ym2612.fm, ym2612.dac|ym2413|
+|ym3812|ym3526, y8950|
+|ym3526, y8950|ym3812|
 
 Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited thus don't expect much.
 
@@ -31,6 +33,8 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
       so full conversion is not possible. 
 - As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
 - Dual chip is not supported.
+- YM3812 to YM3526 or Y8950 conversion drops the waveform information.
+- Y8959 ADPCM is not supported.
 
 # Install
 ```sh
@@ -108,7 +112,10 @@ CHIP CONVERSION
   ym2608, ym2608.fm, ym2608.r     ym2413                                        
   ym2203, ym2203.ssg              ay8910                                        
   ym2608, ym2608.ssg              ay8910                                        
-  ym2612, ym2612.fm, ym2612.dac   ym2413                                        
+  ym2612, ym2612.fm, ym2612.dac   ym2413
+  ym3812                          ym3526, y8950  
+  ym3526, y8950                   ym3812  
+
 
 YM2203 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS
 
