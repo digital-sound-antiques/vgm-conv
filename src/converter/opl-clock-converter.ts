@@ -5,10 +5,11 @@ import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 export class OPLClockConverter extends VGMClockConverter {
   _ratio: number;
   _regs = new Uint8Array(256);
-  _buf = new VGMWriteDataCommandBuffer(256, 1);
+  _buf: VGMWriteDataCommandBuffer;
   constructor(from: ChipInfo, to: ChipInfo, opts: {}) {
     super(from, to.clock, (to.chip === "ymf262" ? 4 : 1) * 3579545);
     this._ratio = this.to.clock / from.clock;
+    this._buf = new VGMWriteDataCommandBuffer(256, to.chip === "ymf262" ? 2: 1);
   }
 
   convertWriteDataCommand(cmd: VGMWriteDataCommand): VGMCommand[] {
