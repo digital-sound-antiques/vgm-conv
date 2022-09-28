@@ -19,6 +19,7 @@ import { YM2203ToOPLConverter } from "./converter/ym2203-to-opl-converter";
 import { OPMClockConverter } from "./converter/opm-clock-converter";
 import { OPL2ToOPLConverter } from "./converter/opl2-to-opl-converter";
 import { OPLToOPL2Converter } from "./converter/opl-to-opl2-converter";
+import { OPLToOPLLConverter } from "./converter/opl-to-opll-converter";
 
 export function getClockConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMConverter | null {
   if (to.chip === "ym3812" || to.chip === "y8950" || to.chip === "ym3526" || to.chip === "ymf262") {
@@ -59,17 +60,26 @@ export function getChipConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMCon
     if (to.chip === "y8950" || to.chip === "ym3526") {
       return new OPL2ToOPLConverter(from, to, opts);
     }
+    if (to.chip === "ym2413") {
+      return new OPLToOPLLConverter(from,to, opts);
+    }
   }
 
   if (from.chip === "ym3526") {
     if (to.chip === "ym3812" || to.chip === "ymf262") {
       return new OPLToOPL2Converter(from, to, opts);
     }
+    if (to.chip === "ym2413") {
+      return new OPLToOPLLConverter(from,to, opts);
+    }
   }
 
   if (from.chip === "y8950") {
     if (to.chip === "ym3812" || to.chip === "ymf262") {
       return new OPLToOPL2Converter(from, to, opts);
+    }
+    if (to.chip === "ym2413") {
+      return new OPLToOPLLConverter(from,to, opts);
     }
   }
 
