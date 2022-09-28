@@ -46,8 +46,8 @@ export class AY8910ToOPLConverter extends VGMConverter {
     const opl3 = this._type === "ymf262";
 
     if (opl3) {
-      this._buf.push(new VGMWriteDataCommand({ cmd: 0x5e, index: this.from.index, addr: 0x01, data: 0x20 })); // Enable Wave Select
-      this._y(0x05, 0x01);
+      // this._buf.push(new VGMWriteDataCommand({ cmd: 0x5e, index: this.from.index, addr: 0x01, data: 0x20 })); // Enable Wave Select
+      this._y(0x05, 0x01); // enable the second OPL block.
     }
 
     for (let ch = 0; ch < 3; ch++) {
