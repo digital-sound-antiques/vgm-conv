@@ -34,7 +34,7 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 - As for YM2612 DAC, only register 2A stream can be converted. VGM's DAC stream commands is not supported.
 - Dual chip is not supported.
 - YM3812 to YM3526 or Y8950 conversion drops the waveform information.
-- Y8959 ADPCM is not supported.
+- Y8950 ADPCM is not supported.
 
 # Install
 ```sh
