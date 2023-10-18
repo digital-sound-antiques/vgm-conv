@@ -2,6 +2,7 @@ import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMCommand, VGMEndCommand, VGMWriteDataCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPNVoice } from "ym-voice";
+import { writeOpmVoiceData } from "../opm";
 
 type VoiceMapEntry = {
   i: number;
@@ -389,6 +390,9 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
         const vdef = this._voiceDefMap[hash];
         console.error(`/*${opnVoice.toMML("mucom88")}*/`);
         console.error(`"${hash}":${_voiceMapEntryString(vdef)}, // Used in CH:${Array.from(channels)}`);
+      }
+      if (this.opts.opmOutput) {
+        writeOpmVoiceData(this.opts.opmOutput, Object.values(this._voiceInfoMap));
       }
       return [cmd];
     }
