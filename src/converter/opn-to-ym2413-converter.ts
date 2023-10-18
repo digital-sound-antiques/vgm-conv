@@ -64,11 +64,11 @@ function _normalizeTotalLevel(data: number[]): number[] {
       data[7] -= min;
       break;
     case 7:
-      min = Math.min(data[5], data[6], data[7], data[8]);
+      min = Math.min(data[4], data[5], data[6], data[7]);
+      data[4] -= min;
       data[5] -= min;
       data[6] -= min;
       data[7] -= min;
-      data[8] -= min;
       break;
   }
   return data;
