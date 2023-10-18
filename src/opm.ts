@@ -1,7 +1,7 @@
 import fs from "fs";
 import { OPNVoice, OPNSlotParam } from "ym-voice";
 
-const OPM_HEADER = "//VOPM tone data\n//Ripped by vgm-conv\n\n";
+const OPM_HEADER = "//VOPM tone data\n//Ripped by vgm-conv\n";
 
 function pad4(value: number) {
   return `${value}`.padStart(4, " ");
@@ -21,7 +21,6 @@ M1:${convertSlot(voice.slots[0])}   0   ${pad4(voice.slots[0].am)}
 C1:${convertSlot(voice.slots[1])}   0   ${pad4(voice.slots[0].am)}
 M2:${convertSlot(voice.slots[2])}   0   ${pad4(voice.slots[0].am)}
 C2:${convertSlot(voice.slots[3])}   0   ${pad4(voice.slots[0].am)}
-
 `;
 }
 
@@ -30,7 +29,7 @@ export function writeOpmVoiceData(filename: string, voices: { opnVoice: OPNVoice
   opmOutput += OPM_HEADER;
 
   voices.forEach((voice, index) => {
-    opmOutput += toVOPM(voice.opnVoice, index, Array.from(voice.channels).join(","));
+    opmOutput += "\n" + toVOPM(voice.opnVoice, index, Array.from(voice.channels).join(","));
   });
 
   fs.writeFileSync(filename, opmOutput);
