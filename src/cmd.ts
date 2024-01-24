@@ -124,6 +124,15 @@ const sections = [
     ]
   },
   {
+    header: "OPN (YM2203/YM2608/YM2612) to YM2413 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} opmOutput={underline filename}",
+        desc: "Output VOPM voice file. VOPM voices are only logged if this is included."
+      },
+    ]
+  },
+  {
     header: "YM2612 to YM2413 OPTIONS",
     content: [
       {
@@ -220,6 +229,7 @@ const defineKeyTypeMap: { [key: string]: any } = {
   "dacEmulation": ["fmpcm", "test", "none"],
   "mixResolver": ["tone", "noise", "mix"],
   "mixChannel": Number,
+  "opmOutput": String,
   "periodicNoiseAssignment": ["tone", "noise", "mix", "env.tri", "env.saw", "none"],
   "periodicNoisePitchShift": Number,
   "periodicNoiseAttenuation": Number,
