@@ -1,4 +1,4 @@
-## 0.11.1
+## 0.11.2
 - Fix rhythm volume in OPLL to OPL conversion.
 
 ## 0.11.0

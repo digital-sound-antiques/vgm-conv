@@ -125,13 +125,13 @@ export class YM2413ToOPLConverter extends VGMConverter {
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 8), key);
+          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 0), key);
           break;
         case 7:
-          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 8), toTL(volume, 8), key);
+          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 0), toTL(volume, 0), key);
           break;
         case 8:
-          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 8), toTL(volume, 8), key);
+          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 0), toTL(volume, 0), key);
           break;
       }
     } else {
