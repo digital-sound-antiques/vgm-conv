@@ -120,20 +120,22 @@ export class YM2413ToOPLConverter extends VGMConverter {
     const voice = inst === 0 ? OPLLVoice.decode(this._regs) : OPLLVoiceMap[inst];
     const key = this._regs[0x20 + ch] & 0x10 ? true : false;
 
+    const toTL = (vol: number, off: number) => Math.max((vol << 2) - off, 0);
+
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._writeVoice(6, OPLLVoiceMap[16], null, volume << 1, key);
+          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 8), key);
           break;
         case 7:
-          this._writeVoice(7, OPLLVoiceMap[17], inst << 1, volume << 1, key);
+          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 8), toTL(volume, 8), key);
           break;
         case 8:
-          this._writeVoice(8, OPLLVoiceMap[18], inst << 1, volume << 1, key);
+          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 8), toTL(volume, 8), key);
           break;
       }
     } else {
-      this._writeVoice(ch, voice, null, volume << 2, key);
+      this._writeVoice(ch, voice, null, toTL(volume, 0), key);
     }
   }
 
