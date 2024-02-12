@@ -1,7 +1,0 @@
-{
-  "rulesDirectory": ["tslint-plugin-prettier"],
-  "rules": {
-    "prettier": true
-  },
-  "extends": ["tslint-config-prettier"]
-}
