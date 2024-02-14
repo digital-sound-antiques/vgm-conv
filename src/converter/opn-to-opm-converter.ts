@@ -138,7 +138,7 @@ export class YM2203ToOPMConverter extends OPNToOPMConverter {
     super(from, _to, opts);
     this._ssgConverter = new AY8910ToOPMConverter(from, _to, {
       whiteNoiseAttenuation: opts?.whiteNoiseAttenuation ?? 72,
-      squareWaveAttenuation: opts?.whiteNoiseAttenuation ?? 4,
+      squareWaveAttenuation: opts?.squareWaveAttenuation ?? 4,
     });
   }
 

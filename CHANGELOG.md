@@ -1,3 +1,6 @@
+## 0.13.3
+- Fixed the problem where `-D squareWaveAttenuation=n` did not work.
+
 ## 0.13.2
 - Tweaked noise volume and frequency in PSG to OPM conversion.
 
