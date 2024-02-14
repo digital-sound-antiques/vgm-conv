@@ -1,3 +1,6 @@
+## 0.13.6
+- Fixed the problem where some channels were not enabled in OPN2 to OPM conversion.
+
 ## 0.13.3
 - Fixed the problem where `-D squareWaveAttenuation=n` did not work.
 

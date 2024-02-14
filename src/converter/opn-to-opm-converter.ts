@@ -8,8 +8,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
   _regs = [new Uint8Array(256), new Uint8Array(256)];
   _buf = new VGMWriteDataCommandBuffer(256, 1);
   _clockRatio: number;
-  /* L/R flags should be enabled by default since there are some VGMs that does not set L/R flags. */
-  _lrCache: Array<number> = [3, 3, 3, 3, 3, 3, 3, 3];
+  _lrCache: Array<number> = [0, 0, 0, 0, 0, 0, 0, 0];
   _clockDiv: number;
 
   constructor(
@@ -67,15 +66,8 @@ export abstract class OPNToOPMConverter extends VGMConverter {
     if (0xb0 <= adr && adr <= 0xb2) {
       const nch = adr & 3;
       const ch = (cmd.port == 0 ? 0 : 4) + nch;
-      let rl = 0;
-      if (this.from.chip == "ym2203") {
-        rl = 3;
-      } else {
-        const lr = this._lrCache[ch];
-        rl = ((lr & 1) << 1) | ((lr >> 1) & 1);
-      }
       // L R FB CON
-      this._y(0x20 + ch, (rl << 6) | (cmd.data & 0x3f));
+      this._y(0x20 + ch, (this.getRLFlags(ch) << 6) | (cmd.data & 0x3f));
     }
 
     // L R AMS PMS
@@ -87,6 +79,8 @@ export abstract class OPNToOPMConverter extends VGMConverter {
       const pms = cmd.data & 0x7;
       // PMS AMS
       this._y(0x38 + ch, (pms << 4) | ams);
+      // L R FB CON
+      this._y(0x20 + ch, (this.getRLFlags(ch) << 6) | (regs[0xb0 + nch] & 0x3f));
     }
 
     // F-Number and Block
@@ -104,6 +98,14 @@ export abstract class OPNToOPMConverter extends VGMConverter {
 
     return this._buf.commit();
   }
+
+  getRLFlags(ch: number) {
+    if (this.from.chip == "ym2203") {
+      return 3;
+    }
+    const lr = this._lrCache[ch];
+    return ((lr & 1) << 1) | ((lr >> 1) & 1);
+  }  
 
   getInitialCommands(): Array<VGMCommand> {
     this._y(0x18, 0xc2); // LFO FREQ
@@ -128,6 +130,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
     return [cmd];
   }
 }
+
 
 export class YM2612ToOPMConverter extends OPNToOPMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
