@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import convertVGM from "./index";
 import { VGM } from "vgm-parser";
+import { ChipInfo } from "./converter/vgm-converter";
 
 const optionDefinitions = [
   {
@@ -13,7 +14,13 @@ const optionDefinitions = [
     defaultOption: true,
     description: "Input VGM file. Standard input will be used if not specified.",
   },
-  { name: "from", alias: "f", typeLabel: "{underline chip}", description: "Specify source chip type.", type: String },
+  {
+    name: "from",
+    alias: "f",
+    typeLabel: "{underline chip}",
+    description: "Specify source chip type. The first detected chip in the input file is used if not specified.",
+    type: String,
+  },
   {
     name: "to",
     alias: "t",
@@ -363,14 +370,28 @@ function main(argv: string[]) {
     const buf = fs.readFileSync(input);
     const vgm = VGM.parse(toArrayBuffer(buf));
 
-    const fromCM = (options.from || options.to).split(".");
-    const fromChipName = fromCM[0];
-    const fromSubModule = fromCM[1];
+    let fromChipName: string | null = null;
+    let fromSubModule: string | null = null;
+    let chips = Object.keys(vgm.chips);
+
+    if (options.from == null) {
+      if (chips.length > 0) {
+        fromChipName = chips[0];
+        fromSubModule = null;
+      }
+    }
+
+    if (fromChipName == null) {
+      const fromCM = (options.from ?? options.to).split(".");
+      fromChipName = fromCM[0];
+      fromSubModule = fromCM[1];
+    }
+
     const from = {
       index: 0,
-      chip: fromChipName,
+      chip: fromChipName as any,
       subModule: fromSubModule,
-      clock: ((vgm.chips as any)[fromChipName] || {}).clock || 0,
+      clock: ((vgm.chips as any)[fromChipName!] || {}).clock || 0,
     };
 
     const toCM = (options.to || options.from).split(".");

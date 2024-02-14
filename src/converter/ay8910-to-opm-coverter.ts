@@ -8,15 +8,15 @@ const VOL_TO_TL = [127, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0]
 export class AY8910ToOPMConverter extends VGMConverter {
   _regs = new Uint8Array(256).fill(0);
   _buf = new VGMWriteDataCommandBuffer(256, 1);
-  _keyAdjust: number;
+  _fdiv: number;
   _clockRatio: number;
   _whiteNoiseAttenuation: number;
   _squareWaveAttenuation: number;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, to);
-    this._clockRatio = 3579545 / this.convertedChipInfo.clock;
-    this._keyAdjust = Math.round(12 * Math.log2(this._clockRatio)) - 12;
+    this._fdiv = from.chip == "ay8910" ? 2 : 4;
+    this._clockRatio = 3579545 / this._fdiv / this.convertedChipInfo.clock;
     this._whiteNoiseAttenuation = opts.whiteNoiseAttenuation ?? 64;
     this._squareWaveAttenuation = opts.squareWaveAttenuation ?? 0;
   }
@@ -54,7 +54,7 @@ export class AY8910ToOPMConverter extends VGMConverter {
   }
 
   _updateFreq(ch: number, freq: number) {
-    const note = freqToOPMNote(freq, this._keyAdjust);
+    const note = freqToOPMNote(freq, this._clockRatio);
     const opmCh = 5 + ch;
     this._y(0x28 + opmCh, note.kc);
     this._y(0x30 + opmCh, note.kf << 2);
@@ -94,13 +94,8 @@ export class AY8910ToOPMConverter extends VGMConverter {
       if (tp == 0) {
         this._updateFreq(ch, 0);
       } else {
-        if (this.from.chip == "ay8910") {
-          const freq = this.from.clock / (16 * tp);
-          this._updateFreq(ch, freq);
-        } else {
-          const freq = this.from.clock / (32 * tp);
-          this._updateFreq(ch, freq);
-        }
+        const freq = this.from.clock / (16 * tp);
+        this._updateFreq(ch, freq);
       }
     } else if (0x08 <= addr && addr <= 0x0a) {
       this._updateTone(addr - 0x08);

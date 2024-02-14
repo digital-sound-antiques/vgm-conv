@@ -7,7 +7,7 @@ import { AY8910ToOPMConverter } from "./ay8910-to-opm-coverter";
 export abstract class OPNToOPMConverter extends VGMConverter {
   _regs = [new Uint8Array(256), new Uint8Array(256)];
   _buf = new VGMWriteDataCommandBuffer(256, 1);
-  _keyAdjust: number;
+  _clockRatio: number;
   /* L/R flags should be enabled by default since there are some VGMs that does not set L/R flags. */
   _lrCache: Array<number> = [3, 3, 3, 3, 3, 3, 3, 3];
   _clockDiv: number;
@@ -18,7 +18,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
     public opts: any,
   ) {
     super(from, to);
-    this._keyAdjust = 12 * Math.log2(3579545 / this.convertedChipInfo.clock);
+    this._clockRatio = 3579545 / this.convertedChipInfo.clock;
     this._clockDiv = from.chip == "ym2203" ? 1.0 : 2.0;
   }
 
@@ -34,7 +34,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
 
   _fnumToNote(fnum: number, blk: number): OPMNote {
     const freq = this._fnumToFreq(fnum, blk);
-    return freqToOPMNote(freq, this._keyAdjust);
+    return freqToOPMNote(freq, this._clockRatio);
   }
 
   convertFM(cmd: VGMWriteDataCommand): VGMCommand[] {
