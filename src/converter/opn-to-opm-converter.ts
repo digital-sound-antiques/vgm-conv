@@ -118,6 +118,9 @@ export abstract class OPNToOPMConverter extends VGMConverter {
         return [cmd];
       } else {
         if (convertFM) {
+          if (this.from.subModule == "fm" && cmd.addr == 0x2b) {
+            return [cmd]; // Pass through YM2612 DAC access
+          }
           return this.convertFM(cmd);
         }
       }
