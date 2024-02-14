@@ -4,7 +4,7 @@ export type OPMNote = {
 };
 
 const BASE_FREQ = 277.2; // C#4 = 60
-//                 C# D D#  E  F  F# G  G# A   A#  B   C
+//                   C# D  D# E  F  F# G  G# A   A#  B   C
 const KEY_TO_NOTE = [0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14];
 
 // clockRatio should be `3579545 / (Output OPM Clock)`

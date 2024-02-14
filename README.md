@@ -36,6 +36,7 @@ Note: downgrade conversion (ex. YM2203 to YM2413 conversion) is highly limited t
 - Dual chip is not supported.
 - YM3812 to YM3526 or Y8950 conversion drops the waveform information.
 - Y8950 ADPCM is not supported.
+- SSG-EG is not supported.
 
 # Install
 ```sh
