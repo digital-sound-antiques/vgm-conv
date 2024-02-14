@@ -16,7 +16,7 @@ export class AY8910ToOPMConverter extends VGMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, to);
     this._clockRatio = 3579545 / this.convertedChipInfo.clock;
-    this._keyAdjust = Math.round(12 * Math.log2(this._clockRatio));
+    this._keyAdjust = Math.round(12 * Math.log2(this._clockRatio)) - 12;
     this._whiteNoiseAttenuation = opts.whiteNoiseAttenuation ?? 64;
     this._squareWaveAttenuation = opts.squareWaveAttenuation ?? 0;
   }
@@ -30,8 +30,8 @@ export class AY8910ToOPMConverter extends VGMConverter {
     // PSG TONE
     for (let ch = 5; ch < 8; ch++) {
       this._y(0x20 + ch, 0xfc); // RL=ON FB=7 CON=4
-      this._y(0x40 + ch, 0x01); // M1: DT=0 ML=1
-      this._y(0x50 + ch, 0x00); // C1: DT=0 ML=0
+      this._y(0x40 + ch, 0x02); // M1: DT=0 ML=1
+      this._y(0x50 + ch, 0x01); // C1: DT=0 ML=0
       this._y(0x60 + ch, 0x1b); // M1: TL=27
       this._y(0x70 + ch, 0x7f); // C1: TL=127 (mute)
       this._y(0x78 + ch, 0x7f); // C2: TL=127 (mute)
