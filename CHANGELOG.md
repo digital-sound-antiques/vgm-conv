@@ -1,3 +1,6 @@
+## 0.13.2
+- Tweaked noise volume and frequency in PSG to OPM conversion.
+
 ## 0.13.1
 - Added OPN to OPM converter.
 - Added AY-3-8910 to OPM converter.

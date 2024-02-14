@@ -137,7 +137,7 @@ export class YM2203ToOPMConverter extends OPNToOPMConverter {
     const _to: ChipInfo = { chip: "ym2151", index: from.index, clock: 1, relativeClock: true };
     super(from, _to, opts);
     this._ssgConverter = new AY8910ToOPMConverter(from, _to, {
-      whiteNoiseAttenuation: opts?.whiteNoiseAttenuation ?? 68,
+      whiteNoiseAttenuation: opts?.whiteNoiseAttenuation ?? 72,
       squareWaveAttenuation: opts?.whiteNoiseAttenuation ?? 4,
     });
   }

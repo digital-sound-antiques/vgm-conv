@@ -34,10 +34,8 @@ export class AY8910ToOPMConverter extends VGMConverter {
       this._y(0x50 + ch, 0x01); // C1: DT=0 ML=0
       this._y(0x60 + ch, 0x1b); // M1: TL=27
       this._y(0x70 + ch, 0x7f); // C1: TL=127 (mute)
-      this._y(0x78 + ch, 0x7f); // C2: TL=127 (mute)
       this._y(0x80 + ch, 0x1f); // M1: AR=31
       this._y(0x90 + ch, 0x1f); // C1: AR=31
-      this._y(0x98 + ch, 0x1f); // C2: AR=31
       this._y(0xa0 + ch, 0); // M1: DR=0
       this._y(0xb0 + ch, 0); // C1: DR=0
       this._y(0xc0 + ch, 0); // M1: DT2=0 SR=0
@@ -47,6 +45,10 @@ export class AY8910ToOPMConverter extends VGMConverter {
       // KEY ON
       this._y(0x08, (0xf << 3) | ch, false);
     }
+
+    // for Noise Slot (slot#32)
+    this._y(0x9f, 0x1f); // C2: AR=31
+    this._y(0x7f, 0x7f); // C2: TL=127 (mute)
 
     return this._buf.commit();
   }
@@ -89,18 +91,22 @@ export class AY8910ToOPMConverter extends VGMConverter {
     if (addr <= 0x05) {
       const ch = addr >> 1;
       const tp = (this._regs[ch * 2 + 1] << 8) | this._regs[ch * 2];
-      if (this.from.chip == "ay8910") {
-        const freq = this.from.clock / (16 * tp);
-        this._updateFreq(ch, freq);
+      if (tp == 0) {
+        this._updateFreq(ch, 0);
       } else {
-        const freq = this.from.clock / (32 * tp);
-        this._updateFreq(ch, freq);
+        if (this.from.chip == "ay8910") {
+          const freq = this.from.clock / (16 * tp);
+          this._updateFreq(ch, freq);
+        } else {
+          const freq = this.from.clock / (32 * tp);
+          this._updateFreq(ch, freq);
+        }
       }
     } else if (0x08 <= addr && addr <= 0x0a) {
       this._updateTone(addr - 0x08);
       this._updateNoise();
     } else if (addr === 0x06) {
-      this._nfreq = 31 - Math.min(31, Math.floor((this._regs[0x06] & 0x1f) / this._clockRatio));
+      this._nfreq = Math.min(31, Math.floor((this._regs[0x06] & 0x1f) / this._clockRatio));
       this._updateNoise();
     } else if (addr === 0x07) {
       this._updateTone(0);

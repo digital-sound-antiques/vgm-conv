@@ -12,7 +12,7 @@ vgm-conv supports non-trivial conversion across various chip types.
 
 |FROM|TO|
 |-|-|
-|ay8910|ym2203, ym2608, ym3812, y8950, ym3526, ymf262|
+|ay8910|ym2151, ym2203, ym2608, ym3526, ym3812, y8950, ymf262|
 |sn76489|ay8910, ym2203, ym2608|
 |ym2413|ym2608, ym3812, y8950, ym3526, ymf262|
 |ym2203, ym2203.ssg|ay8910, ym3812, y8950, ym3526, ymf262|
@@ -20,6 +20,7 @@ vgm-conv supports non-trivial conversion across various chip types.
 |ym2203, ym2203.fm|ym2413, ym3812, y8950, ym3526, ymf262|
 |ym2608, ym2608.fm, ym2608.r|ym2413|
 |ym2612, ym2612.fm, ym2612.dac|ym2413|
+|ym2203.fm, ym2608.fm, ym2612.fm|ym2151|
 |ym3812|ym3526, y8950, ym2413|
 |ym3526, y8950|ym3812, ym2413|
 
@@ -144,7 +145,7 @@ YM2203 to YM2151 OPTIONS
   -D squareWaveAttenuation=n   Volume attenuation for the SSG square tone. The  
                                default value is 4.                              
   -D whiteNoiseAttenuation=n   Volume attenuation for the SSG noice. The        
-                               default value is 68.                             
+                               default value is 72.                             
 
 YM2612 to YM2413 OPTIONS
 

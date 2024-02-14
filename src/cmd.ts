@@ -155,7 +155,7 @@ const sections = [
       },
       {
         def: "{bold -D} whiteNoiseAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG noice. The default value is 68.`,
+        desc: `Volume attenuation for the SSG noice. The default value is 72.`,
       },
     ],
   },
