@@ -1,3 +1,7 @@
+## 0.13.0
+- Added OPN to OPM converter.
+- Added AY-3-8910 to OPM converter.
+
 ## 0.12.0
 - Upgraded npm dependencies.
 - Changed minimum node version to 18.0.0.

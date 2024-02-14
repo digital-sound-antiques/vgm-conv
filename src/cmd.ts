@@ -11,7 +11,7 @@ const optionDefinitions = [
     alias: "i",
     typeLabel: "{underline file}",
     defaultOption: true,
-    description: "Input VGM file. Standard input will be used if not specified."
+    description: "Input VGM file. Standard input will be used if not specified.",
   },
   { name: "from", alias: "f", typeLabel: "{underline chip}", description: "Specify source chip type.", type: String },
   {
@@ -19,14 +19,14 @@ const optionDefinitions = [
     alias: "t",
     typeLabel: "{underline chip}",
     description: "Specify destination chip type.",
-    type: String
+    type: String,
   },
   {
     name: "clock",
     alias: "c",
     typeLabel: "{underline clock}",
     description: "Specify clock in Hz of destination chip. The typical clock value will be applied if not specified.",
-    type: Number
+    type: Number,
   },
   {
     name: "define",
@@ -34,7 +34,7 @@ const optionDefinitions = [
     typeLabel: "{underline name=value}",
     description: "Define converter option variable. See below.",
     lazyMultiple: true,
-    type: String
+    type: String,
   },
   {
     name: "output",
@@ -42,51 +42,51 @@ const optionDefinitions = [
     typeLabel: "{underline file}",
     description:
       "Output VGM file. The standard output is used if not speicified. If the given file is *.vgz, the output will be compressed.",
-    type: String
+    type: String,
   },
   {
     name: "no-gd3",
     description: "Remove GD3 tag from output.",
-    type: Boolean
+    type: Boolean,
   },
   {
     name: "voice-table",
     typeLabel: "{underline file}",
     description: "Specify the voice table file in JavaScript.",
-    type: String
+    type: String,
   },
   {
     name: "voiceTable",
     typeLabel: "{underline file}",
     description: "(deprecated) Specify the voice table file in JavaScript.",
-    type: String
+    type: String,
   },
   {
     name: "version",
     alias: "v",
     description: "Show version.",
-    type: Boolean
+    type: Boolean,
   },
   {
     name: "help",
     alias: "h",
     description: "Show this help.",
-    type: Boolean
-  }
+    type: Boolean,
+  },
 ];
 
 const sections = [
   {
     header: "vgm-conv",
-    content: "Chip-type and clock converter for VGM."
+    content: "Chip-type and clock converter for VGM.",
   },
   {
     header: "SYNOPSIS",
-    content: ["{underline vgm-conv} [<option>] <file>"]
+    content: ["{underline vgm-conv} [<option>] <file>"],
   },
   {
     header: "OPTIONS",
-    optionList: optionDefinitions
+    optionList: optionDefinitions,
   },
   {
     header: "CLOCK CONVERSION",
@@ -95,8 +95,8 @@ const sections = [
       { chip: "sn76489, ym2612" },
       { chip: "ay8910, ym2151, ym2203, ym2608" },
       { chip: "ym3812, ym3526, y8950, ymf262" },
-      { chip: "ym2413" }
-    ]
+      { chip: "ym2413" },
+    ],
   },
   {
     header: "CHIP CONVERSION",
@@ -107,63 +107,88 @@ const sections = [
       { from: "ym2413", to: "ym2608, ym3812, y8950, ym3526, ymf262" },
       { from: "ym2203, ym2203.fm", to: "ym2413" },
       { from: "ym2608, ym2608.fm, ym2608.r", to: "ym2413" },
-      { from: "ym2203, ym2203.ssg", to: "ay8910" },
-      { from: "ym2608, ym2608.ssg", to: "ay8910" },
+      { from: "ym2203.ssg", to: "ay8910" },
+      { from: "ym2608.ssg", to: "ay8910" },
       { from: "ym2612, ym2612.fm, ym2612.dac", to: "ym2413" },
+      { from: "ym2203, ym2612.fm, ym2608.fm", to: "ym2151" },
       { from: "ym3812", to: "y8950, ym3526, ym2413" },
       { from: "y8950, ym3526", to: "ym3812, ym2413" },
-    ]
+    ],
   },
   {
     header: "YM2203 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS",
     content: [
       {
         def: "{bold -D} ssgAttenuation={underline n}",
-        desc: "Set SSG volume attenuation level to 0.75*{underline n}(dB). The effective range is -63<={underline n}<=63."
-      }
-    ]
+        desc: "Set SSG volume attenuation level to 0.75*{underline n}(dB). The effective range is -63<={underline n}<=63.",
+      },
+    ],
   },
   {
     header: "OPN (YM2203/YM2608/YM2612) to YM2413 OPTIONS",
     content: [
       {
         def: "{bold -D} opmOutput={underline filename}",
-        desc: "Output VOPM voice file. VOPM voices are only logged if this is included."
+        desc: "Output VOPM voice file. VOPM voices are only logged if this is included.",
       },
-    ]
+    ],
+  },
+  {
+    header: "AY8910 to YM2151 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} squareWaveAttenuation={underline n}",
+        desc: `Volume attenuation for the SSG square tone. The default value is 0.`,
+      },
+      {
+        def: "{bold -D} whiteNoiseAttenuation={underline n}",
+        desc: `Volume attenuation for the SSG noice. The default value is 64.`,
+      },
+    ],
+  },
+  {
+    header: "YM2203 to YM2151 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} squareWaveAttenuation={underline n}",
+        desc: `Volume attenuation for the SSG square tone. The default value is 4.`,
+      },
+      {
+        def: "{bold -D} whiteNoiseAttenuation={underline n}",
+        desc: `Volume attenuation for the SSG noice. The default value is 68.`,
+      },
+    ],
   },
   {
     header: "YM2612 to YM2413 OPTIONS",
     content: [
       {
         def: "{bold -D} decimation={underline n}",
-        desc:
-          "Decimate 1 of {underline n} PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. {underline n}=0 disables the feature and results the best playback quality. The default value is 4."
+        desc: "Decimate 1 of {underline n} PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. {underline n}=0 disables the feature and results the best playback quality. The default value is 4.",
       },
       {
         def: "{bold -D} dacEmulation=fmpcm|test|none",
         desc: `fmpcm: use the pseudo 6-bit DAC emulation on FM channels is used (default).
                test:  use YM2413 test mode to realize 7.5bit DAC but this disables all FM channels.
-               none:  disable DAC emulation (default).`
-      }
-    ]
+               none:  disable DAC emulation (default).`,
+      },
+    ],
   },
   {
     header: "SN76489 to AY8910 OPTIONS",
     content: [
       {
         def: "{bold -D} mixChannel={underline value}",
-        desc:
-          `Specify the AY8910 channel used for noise output. The value must be one of 0, 1, 2 or none. The default value is 2. 
+        desc: `Specify the AY8910 channel used for noise output. The value must be one of 0, 1, 2 or none. The default value is 2. 
            If 'none' is specified, all noise part will be silent.
-           Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.`
+           Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.`,
       },
       {
         def: "{bold -D} mixResolver=tone|noise|mix",
         desc: `This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.
                - tone: tone will be output. noise will be silent.
                - noise: noise will be output. tone will be silent.
-               - mix: both tone and noise will be output (default).`
+               - mix: both tone and noise will be output (default).`,
       },
       {
         def: "{bold -D} periodicNoiseAssignment={underline value}",
@@ -173,70 +198,71 @@ const sections = [
                - mix: square wave + white nosie.
                - env.tri: hardware triangle envelope. This will always make volume maximum.
                - env.saw: hardware saw envelope. The will always make volume maximum.
-               - none: no output.`
+               - none: no output.`,
       },
       {
         def: "{bold -D} periodicNoisePitchShift={underline n}",
-        desc: `The pitch shift amount of the periodic noise conversion. pow(2, -{underline n}) will be multiplied to the noise frequency. The default value is 4.`
+        desc: `The pitch shift amount of the periodic noise conversion. pow(2, -{underline n}) will be multiplied to the noise frequency. The default value is 4.`,
       },
       {
         def: "{bold -D} channelAttenuationMap={underline n1},{underline n2},{underline n3},{underline n4}",
-        desc: `Volume attenuation mapping for SN76489 channels. {underline n1}, {underline n2}, ... {underline n4} correspond to SN76489's ch1, ch2, ... ch4 respectively. The default value is 0,0,0,0.`
+        desc: `Volume attenuation mapping for SN76489 channels. {underline n1}, {underline n2}, ... {underline n4} correspond to SN76489's ch1, ch2, ... ch4 respectively. The default value is 0,0,0,0.`,
       },
       {
         def: "{bold -D} whiteNoiseAttenuation={underline n}",
-        desc: `Additional volume attenuation for the white noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`
-      },      
+        desc: `Additional volume attenuation for the white noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`,
+      },
       {
         def: "{bold -D} periodicNoiseAttenuation={underline n}",
-        desc: `Additional volume attenuation for periodic noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`
-      },      
+        desc: `Additional volume attenuation for periodic noise. This value will be added to the {underline n4} specified on volumeAttenuationMap. The default value is 0.`,
+      },
       {
         def: "{bold -D} noisePitchMap={underline n1},{underline n2},{underline n3}",
-        desc: `The noise frequency of AY8910. {underline n1}, {underline n2} and {underline n3} correspond to SN76489's noise frequency 0, 1 and 2 respectively. The default value is 7,15,31.`
-      }
-    ]
+        desc: `The noise frequency of AY8910. {underline n1}, {underline n2} and {underline n3} correspond to SN76489's noise frequency 0, 1 and 2 respectively. The default value is 7,15,31.`,
+      },
+    ],
   },
   {
     header: "EXAMPLES",
     content: [
       {
         desc: "YM2612 to YM2413",
-        example: "$ vgm-conv -f ym2612 -t ym2413 input.vgm"
+        example: "$ vgm-conv -f ym2612 -t ym2413 input.vgm",
       },
       {
         desc: "Both YM2413 and AY8910 to YM2608",
-        example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608"
+        example: "$ vgm-conv -f ay8910 -t ym2608 input.vgm | vgm-conv -f ym2413 -t ym2608",
       },
       {
         desc: "YM2203's FM part to YM2413 and SSG part to AY8910",
-        example: "$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910"
+        example: "$ vgm-conv -f ym2203.fm -t ym2413 input.vgm | vgm-conv -f ym2203 -t ay8910",
       },
       {
         desc: "Only DAC part of YM2612 to YM2413",
-        example: "$ vgm-conv -f ym2612.dac -t ym2413 input.vgm"
+        example: "$ vgm-conv -f ym2612.dac -t ym2413 input.vgm",
       },
       {
         desc: "YM2612 to YM2413@4.00MHz",
-        example: "$ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm"
-      }
-    ]
-  }
+        example: "$ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm",
+      },
+    ],
+  },
 ];
 
 const defineKeyTypeMap: { [key: string]: any } = {
-  "decimation": Number,
-  "dacEmulation": ["fmpcm", "test", "none"],
-  "mixResolver": ["tone", "noise", "mix"],
-  "mixChannel": Number,
-  "opmOutput": String,
-  "periodicNoiseAssignment": ["tone", "noise", "mix", "env.tri", "env.saw", "none"],
-  "periodicNoisePitchShift": Number,
-  "periodicNoiseAttenuation": Number,
-  "whiteNoiseAttenuation": Number,
-  "noisePitchMap": Uint8Array,
-  "channelAttenuationMap": Uint8Array,
-  "ssgAttenuation": Number,
+  decimation: Number,
+  dacEmulation: ["fmpcm", "test", "none"],
+  mixResolver: ["tone", "noise", "mix"],
+  mixChannel: Number,
+  opmOutput: String,
+  periodicNoiseAssignment: ["tone", "noise", "mix", "env.tri", "env.saw", "none"],
+  periodicNoisePitchShift: Number,
+  periodicNoiseAttenuation: Number,
+  whiteNoiseAttenuation: Number,
+  squareWaveAttenuation: Number,
+  noisePitchMap: Uint8Array,
+  channelAttenuationMap: Uint8Array,
+  ssgAttenuation: Number,
 };
 
 function toArrayBuffer(b: Buffer) {
@@ -244,8 +270,8 @@ function toArrayBuffer(b: Buffer) {
 }
 
 function parseValue(text: string): boolean | string | number | Array<any> {
-  if (text.indexOf(',') >= 0) {
-    return text.split(',');
+  if (text.indexOf(",") >= 0) {
+    return text.split(",");
   }
   if (text === "true") {
     return true;
@@ -302,7 +328,7 @@ const defaultClocks: { [key: string]: number } = {
   ym3812: 3579545,
   ym8950: 3579545,
   ym3526: 3579545,
-  ymf262: 14318180
+  ymf262: 14318180,
 };
 
 function main(argv: string[]) {
@@ -344,7 +370,7 @@ function main(argv: string[]) {
       index: 0,
       chip: fromChipName,
       subModule: fromSubModule,
-      clock: ((vgm.chips as any)[fromChipName] || {}).clock || 0
+      clock: ((vgm.chips as any)[fromChipName] || {}).clock || 0,
     };
 
     const toCM = (options.to || options.from).split(".");
@@ -352,7 +378,7 @@ function main(argv: string[]) {
     const to = {
       index: 0,
       chip: toChipName,
-      clock: options.clock || defaultClocks[toChipName] || 0
+      clock: options.clock || defaultClocks[toChipName] || 0,
     };
 
     const opts = parseDefines(options.define);

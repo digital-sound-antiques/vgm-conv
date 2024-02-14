@@ -1,60 +1,58 @@
 {
-    "name": "vgm-conv",
-    "version": "0.12.0",
-    "description": "Chip-type and clock converter for VGM.",
-    "main": "dist/index.js",
-    "bin": {
-        "vgm-conv": "bin/cmd.js"
-    },
-    "files": [
-        "bin",
-        "README.md",
-        "package.json",
-        "dist"
-    ],
-    "scripts": {
-        "prepare": "npm run clean && npm run build",
-        "clean": "rm-cli -ss -r dist",
-        "build": "tsc",
-        "typedoc": "typedoc"
-    },
-    "author": "Mitsutaka Okazaki",
-    "license": "ISC",
-    "dependencies": {
-        "command-line-args": "^5.2.0",
-        "command-line-usage": "^7.0.1",
-        "vgm-parser": "^0.9.4",
-        "ym-voice": "^0.2.0",
-        "zlibjs": "^0.3.1"
-    },
-    "devDependencies": {
-        "@types/command-line-args": "^5.2.0",
-        "@types/command-line-usage": "^5.0.4",
-        "@types/node": "^18.19.15",
-        "prettier": "^3.2.5",
-        "rm-cli": "^1.4.2",
-        "typescript": "^5.3.3"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/digital-sound-antiques/vgm-conv"
-    },
-    "keywords": [
-        "vgm",
-        "chiptune",
-        "psg",
-        "ym2151",
-        "ym2413",
-        "ym2612",
-        "ym2203",
-        "ym2608",
-        "ym3812",
-        "ym3526",
-        "y8950",
-        "ymf262",
-        "ay-3-8910"
-    ],
-    "engines": {
-        "node": ">=18.0.0"
-    }
+  "name": "vgm-conv",
+  "version": "0.13.0",
+  "description": "Chip-type and clock converter for VGM.",
+  "main": "dist/index.js",
+  "bin": {
+    "vgm-conv": "bin/cmd.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "package.json",
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "npm run clean && npm run build",
+    "clean": "rimraf dist",
+    "build": "tsc"
+  },
+  "author": "Mitsutaka Okazaki",
+  "license": "ISC",
+  "dependencies": {
+    "command-line-args": "^5.2.0",
+    "command-line-usage": "^7.0.1",
+    "rimraf": "^5.0.5",
+    "vgm-parser": "^0.10.0",
+    "ym-voice": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/command-line-args": "^5.2.0",
+    "@types/command-line-usage": "^5.0.4",
+    "@types/node": "^18.19.15",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/digital-sound-antiques/vgm-conv"
+  },
+  "keywords": [
+    "vgm",
+    "chiptune",
+    "psg",
+    "ym2151",
+    "ym2413",
+    "ym2612",
+    "ym2203",
+    "ym2608",
+    "ym3812",
+    "ym3526",
+    "y8950",
+    "ymf262",
+    "ay-3-8910"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

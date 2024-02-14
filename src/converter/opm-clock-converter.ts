@@ -15,7 +15,6 @@ export class OPMClockConverter extends VGMClockConverter {
   constructor(from: ChipInfo, toClock: number, opts: {}) {
     super(from, toClock, 3579545);
     this._ratio = this.to.clock / from.clock;
-    console.log(`ratio: ${this._ratio}`);
     this._keyDiff = Math.round(12 * Math.log2(1.0 / this._ratio) * 256);
     /* LFO_FREQ = CLOCK * POWER(2, LFRQ/16 - 32) = CLOCK' * POWER(2, LFRQ'/16 - 32) */
     /* => LFRQ' = 16 * LOG2(CLOCK/CLOCK') + LFRQ */

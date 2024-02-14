@@ -81,26 +81,31 @@ SYNOPSIS
 
 OPTIONS
 
-  -i, --input file          Input VGM file. Standard input will be used if not specified.                 
-  -f, --from chip           Specify source chip type.                                                     
-  -t, --to chip             Specify destination chip type.                                                
-  -c, --clock clock         Specify clock in Hz of destination chip. The typical clock value will be      
-                            applied if not specified.                                                     
-  -D, --define name=value   Define converter option variable. See below.                                  
-  -o, --output file         Output VGM file. The standard output is used if not speicified. If the given  
-                            file is *.vgz, the output will be compressed.                                 
-  --no-gd3                  Remove GD3 tag from output.
-  --voice-table file        Specify the voice table file.  
-  -v, --version             Show version.                                                    
-  -h, --help                Show this help.                                                               
+  -i, --input file          Input VGM file. Standard input will be used if not  
+                            specified.                                          
+  -f, --from chip           Specify source chip type.                           
+  -t, --to chip             Specify destination chip type.                      
+  -c, --clock clock         Specify clock in Hz of destination chip. The        
+                            typical clock value will be applied if not          
+                            specified.                                          
+  -D, --define name=value   Define converter option variable. See below.        
+  -o, --output file         Output VGM file. The standard output is used if not 
+                            speicified. If the given file is *.vgz, the output  
+                            will be compressed.                                 
+  --no-gd3                  Remove GD3 tag from output.                         
+  --voice-table file        Specify the voice table file in JavaScript.         
+  --voiceTable file         (deprecated) Specify the voice table file in        
+                            JavaScript.                                         
+  -v, --version             Show version.                                       
+  -h, --help                Show this help.                                     
 
 CLOCK CONVERSION
 
-  AVAILABLE CHIPS               
-  sn76489, ym2612               
-  ay8910, ym2151, ym2203, ym2608        
-  ym3812, ym3526, y8950, ymf262 
-  ym2413                        
+  AVAILABLE CHIPS                
+  sn76489, ym2612                
+  ay8910, ym2151, ym2203, ym2608 
+  ym3812, ym3526, y8950, ymf262  
+  ym2413                         
 
 CHIP CONVERSION
 
@@ -110,39 +115,123 @@ CHIP CONVERSION
   ym2413                          ym2608, ym3812, y8950, ym3526, ymf262         
   ym2203, ym2203.fm               ym2413                                        
   ym2608, ym2608.fm, ym2608.r     ym2413                                        
-  ym2203, ym2203.ssg              ay8910                                        
-  ym2608, ym2608.ssg              ay8910                                        
-  ym2612, ym2612.fm, ym2612.dac   ym2413
-  ym3812                          ym3526, y8950, ym2413  
-  ym3526, y8950                   ym3812, ym2413  
-
+  ym2203.ssg                      ay8910                                        
+  ym2608.ssg                      ay8910                                        
+  ym2612, ym2612.fm, ym2612.dac   ym2413                                        
+  ym2203, ym2612.fm, ym2608.fm    ym2151                                        
+  ym3812                          y8950, ym3526, ym2413                         
+  y8950, ym3526                   ym3812, ym2413                                
 
 YM2203 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS
 
-  -D ssgAttenuation=n   Set SSG volume attenuation level to 0.75*n(dB). The effective range is -63<=n<=63.
+  -D ssgAttenuation=n   Set SSG volume attenuation level to 0.75*n(dB). The     
+                        effective range is -63<=n<=63.                          
+
+OPN (YM2203/YM2608/YM2612) to YM2413 OPTIONS
+
+  -D opmOutput=filename   Output VOPM voice file. VOPM voices are only logged   
+                          if this is included.                                  
+
+AY8910 to YM2151 OPTIONS
+
+  -D squareWaveAttenuation=n   Volume attenuation for the SSG square tone. The  
+                               default value is 0.                              
+  -D whiteNoiseAttenuation=n   Volume attenuation for the SSG noice. The        
+                               default value is 64.                             
+
+YM2203 to YM2151 OPTIONS
+
+  -D squareWaveAttenuation=n   Volume attenuation for the SSG square tone. The  
+                               default value is 4.                              
+  -D whiteNoiseAttenuation=n   Volume attenuation for the SSG noice. The        
+                               default value is 68.                             
 
 YM2612 to YM2413 OPTIONS
 
-  -D decimation=n                  Decimate 1 of n PCM data. 2 to 4 is recommended if USB serial device (like SPFM) is used to play VGM. n=0 
-                                   disables the feature and results the best playback quality. The default value is 4.                       
-  -D dacEmulation=fmpcm|test|none  fmpcm: use pseudo 6-bit DAC is used (default).
-                                   test:  use YM2413 test mode is used 7.5bit DAC but disables all YM2413 FM channels.
-                                   none:  disable DAC emulation.
+  -D decimation=n                   Decimate 1 of n PCM data. 2 to 4 is         
+                                    recommended if USB serial device (like      
+                                    SPFM) is used to play VGM. n=0 disables the 
+                                    feature and results the best playback       
+                                    quality. The default value is 4.            
+  -D dacEmulation=fmpcm|test|none   fmpcm: use the pseudo 6-bit DAC emulation   
+                                    on FM channels is used (default).           
+                                    test:  use YM2413 test mode to realize      
+                                    7.5bit DAC but this disables all FM         
+                                    channels.                                   
+                                    none:  disable DAC emulation (default).     
 
 SN76489 to AY8910 OPTIONS
 
-  -D mixChannel=value                Specify the AY8910 channel used for noise output. The value must be one of 0, 1, 2 or none. The default value is 2.                                                        
-                                     If 'none' is specified, all noise part will be silent.                                                                                                                     
-                                     Since AY8910 has no independent noise channel, SN76489's noise channel will be mixed with a tone channel into the single AY8910's channel specified by this option.        
-  -D mixResolver=tone|noise|mix      This option determines the behavior when tone and noise are requested to be key-on simultaneously on the same AY8910 channel.                                              
-                                     'tone': tone will be output. noise will be silent.                                                                                                                         
-                                     'noise': noise will be output. tone will be silent.                                                                                                                        
-                                     'mix': both tone and noise will be output (default).                                                                                                                       
-  -D periodicNoisePitchShift=n           The pitch shift amount of the periodic noise conversion. pow(2, -n) will be multiplied to the noise frequency. The default value is 4.                                             
-  -D channelAttenuationMap=n1,n2,n3,n4   Volume attenuation mapping for SN76489 channels. n1, n2, ... n4 correspond to SN76489's ch1, ch2, ... ch4 respectively. The default value is 0,0,0,0.                              
-  -D whiteNoiseAttenuation=n             Additional volume attenuation for the white noise. This value will be added to the n4 specified on volumeAttenuationMap. The default value is 0.                                   
-  -D periodicNoiseAttenuation=n          Additional volume attenuation for periodic noise. This value will be added to the n4 specified on volumeAttenuationMap. The default value is 0.                                    
-  -D noisePitchMap=n1,n2,n3              The noise frequency of AY8910. n1, n2 and n3 correspond to SN76489's noise frequency 0, 1 and 2 respectively. The default value is 7,15,31.
+  -D mixChannel=value                    Specify the AY8910 channel used for    
+                                         noise output. The value must be one of 
+                                         0, 1, 2 or none. The default value is  
+                                         2.                                     
+                                         If 'none' is specified, all noise part 
+                                         will be silent.                        
+                                         Since AY8910 has no independent noise  
+                                         channel, SN76489's noise channel will  
+                                         be mixed with a tone channel into the  
+                                         single AY8910's channel specified by   
+                                         this option.                           
+  -D mixResolver=tone|noise|mix          This option determines the behavior    
+                                         when tone and noise are requested to   
+                                         be key-on simultaneously on the same   
+                                         AY8910 channel.                        
+                                         - tone: tone will be output. noise     
+                                         will be silent.                        
+                                         - noise: noise will be output. tone    
+                                         will be silent.                        
+                                         - mix: both tone and noise will be     
+                                         output (default).                      
+  -D periodicNoiseAssignment=value       Specify the target to which SN76489's  
+                                         periodic noise will be converted. The  
+                                         value must be one of the following:    
+                                         - tone: square wave (default).         
+                                         - noise: white noise.                  
+                                         - mix: square wave + white nosie.      
+                                         - env.tri: hardware triangle envelope. 
+                                         This will always make volume maximum.  
+                                         - env.saw: hardware saw envelope. The  
+                                         will always make volume maximum.       
+                                         - none: no output.                     
+  -D periodicNoisePitchShift=n           The pitch shift amount of the periodic 
+                                         noise conversion. pow(2, -n) will be   
+                                         multiplied to the noise frequency. The 
+                                         default value is 4.                    
+  -D channelAttenuationMap=n1,n2,n3,n4   Volume attenuation mapping for SN76489 
+                                         channels. n1, n2, ... n4 correspond    
+                                         to SN76489's ch1, ch2, ... ch4         
+                                         respectively. The default value is     
+                                         0,0,0,0.                               
+  -D whiteNoiseAttenuation=n             Additional volume attenuation for the  
+                                         white noise. This value will be added  
+                                         to the n4 specified on                 
+                                         volumeAttenuationMap. The default      
+                                         value is 0.                            
+  -D periodicNoiseAttenuation=n          Additional volume attenuation for      
+                                         periodic noise. This value will be     
+                                         added to the n4 specified on           
+                                         volumeAttenuationMap. The default      
+                                         value is 0.                            
+  -D noisePitchMap=n1,n2,n3              The noise frequency of AY8910. n1, n2  
+                                         and n3 correspond to SN76489's noise   
+                                         frequency 0, 1 and 2 respectively. The 
+                                         default value is 7,15,31.              
+
+EXAMPLES
+
+  YM2612 to YM2413                        $ vgm-conv -f ym2612 -t ym2413        
+                                          input.vgm                             
+  Both YM2413 and AY8910 to YM2608        $ vgm-conv -f ay8910 -t ym2608        
+                                          input.vgm | vgm-conv -f ym2413 -t     
+                                          ym2608                                
+  YM2203's FM part to YM2413 and SSG      $ vgm-conv -f ym2203.fm -t ym2413     
+  part to AY8910                          input.vgm | vgm-conv -f ym2203 -t     
+                                          ay8910                                
+  Only DAC part of YM2612 to YM2413       $ vgm-conv -f ym2612.dac -t ym2413    
+                                          input.vgm                             
+  YM2612 to YM2413@4.00MHz                $ vgm-conv -f ym2612 -t ym2413 -c     
+                                          4000000 input.vgm                     
     
 EXAMPLES
 
@@ -153,7 +242,7 @@ EXAMPLES
   YM2612 to YM2413@4.00MHz                            $ vgm-conv -f ym2612 -t ym2413 -c 4000000 input.vgm     
 ```
 
-# Voice Table (Beta)
+# Voice Table (Experimental)
 The voice table configuration can be defined in JavaScript. Only OPN/OPNA/OPN2 to OPLL conversions are supported. To load the voice table configuration, use `--voice-table <file>` option.
 
 ```voice-table.js
