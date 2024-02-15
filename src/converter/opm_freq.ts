@@ -16,6 +16,6 @@ export function freqToOPMNote(freq: number, clockRatio: number): OPMNote {
   const frac = key - Math.floor(key);
   const kf = Math.floor(frac * 64);
   const note = KEY_TO_NOTE[Math.floor(key) % 12];
-  const oct = Math.floor(key / 12);
+  const oct = Math.min(7, Math.floor(key / 12));
   return { kc: (oct << 4) | note, kf };
 }

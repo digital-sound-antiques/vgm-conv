@@ -9,6 +9,7 @@
   "files": [
     "bin",
     "README.md",
+    "LICENSE.md",
     "package.json",
     "dist"
   ],
@@ -22,15 +23,15 @@
   "dependencies": {
     "command-line-args": "^5.2.0",
     "command-line-usage": "^7.0.1",
-    "rimraf": "^5.0.5",
     "vgm-parser": "^0.10.0",
-    "ym-voice": "^0.2.0"
+    "ym-voice": "^0.3.0"
   },
   "devDependencies": {
     "@types/command-line-args": "^5.2.0",
     "@types/command-line-usage": "^5.0.4",
     "@types/node": "^18.19.15",
     "prettier": "^3.2.5",
+    "rimraf": "^5.0.5",
     "typescript": "^5.3.3"
   },
   "repository": {
