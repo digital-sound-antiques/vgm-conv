@@ -1,3 +1,6 @@
+## 0.13.7
+- Fixed the problem where the OPM noise frequency was inverted.
+
 ## 0.13.6
 - Fixed the problem where some channels were not enabled in OPN2 to OPM conversion.
 

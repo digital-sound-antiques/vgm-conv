@@ -145,11 +145,11 @@ const sections = [
     content: [
       {
         def: "{bold -D} squareWaveAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG square tone. The default value is 0.`,
+        desc: `Volume attenuation for the SSG square tone. 0<=n<=127. The default value is 0.`,
       },
       {
         def: "{bold -D} whiteNoiseAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG noice. The default value is 64.`,
+        desc: `Volume attenuation for the SSG noice. 0<=n<=127. The default value is 68.`,
       },
     ],
   },
@@ -157,12 +157,16 @@ const sections = [
     header: "YM2203 to YM2151 OPTIONS",
     content: [
       {
+        def: "{bold -D} ssgAttenuation={underline n}",
+        desc: `Volume attenuation for the SSG. 0<=n<=127. The default value is 8.`,
+      },
+      {
         def: "{bold -D} squareWaveAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG square tone. The default value is 4.`,
+        desc: `Additional volume attenuation for the SSG square tone. 0<=n<=127. The default value is 0.`,
       },
       {
         def: "{bold -D} whiteNoiseAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG noice. The default value is 72.`,
+        desc: `Additional volume attenuation for the SSG noice. 0<=n<=127. The default value is 68.`,
       },
     ],
   },
