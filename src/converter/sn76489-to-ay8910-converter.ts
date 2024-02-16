@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 
 const voltbl = [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 0];
@@ -72,7 +72,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     const addr = index === 0 ? a : a | 0x80;
     this._buf.push(
       new VGMWriteDataCommand({
-        cmd: 0xa0,
+        targetId: VGMWriteDataTargetId.ay8910,
         index,
         port: 0,
         addr,

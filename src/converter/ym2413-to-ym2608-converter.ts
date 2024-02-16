@@ -1,12 +1,14 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPNSlotParam, OPLLVoiceMap, OPLLVoice } from "ym-voice";
 
 /* level key scaling table */
 const KSLTable = [0, 24, 32, 37, 40, 43, 45, 47, 48, 50, 51, 52, 53, 54, 55, 56];
 
-const ROM_VOICES = OPLLVoiceMap.map((e) => { return { opll: e, opn: e.toOPN() }; });
+const ROM_VOICES = OPLLVoiceMap.map((e) => {
+  return { opll: e, opn: e.toOPN() };
+});
 
 export class YM2413ToYM2608Converter extends VGMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
@@ -21,12 +23,18 @@ export class YM2413ToYM2608Converter extends VGMConverter {
     { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
     { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
     { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() }];
+    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
+  ];
 
   _y(port: number, addr: number, data: number, optimize: boolean = true) {
-    const cmd = (this.from.index == 0 ? 0x56 : 0xa6) + port;
+    let targetId;
+    if (port == 0) {
+      targetId = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p0 : VGMWriteDataTargetId.ym2608_2_p0;
+    } else {
+      targetId = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p1 : VGMWriteDataTargetId.ym2608_2_p1;
+    }
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd, index, port, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId, index, port, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

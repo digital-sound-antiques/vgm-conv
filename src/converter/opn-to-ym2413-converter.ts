@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMEndCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMEndCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPNVoice } from "ym-voice";
 import { writeOpmVoiceData } from "../opm";
@@ -81,21 +81,21 @@ function _programString(program: number) {
   }
   const res = [];
   if (program & (1 << 10)) {
-    res.push('HH');
+    res.push("HH");
   }
   if (program & (1 << 11)) {
-    res.push('CYM');
+    res.push("CYM");
   }
   if (program & (1 << 12)) {
-    res.push('TOM');
+    res.push("TOM");
   }
   if (program & (1 << 13)) {
-    res.push('SD');
+    res.push("SD");
   }
   if (program & (1 << 14)) {
-    res.push('BD');
+    res.push("BD");
   }
-  return res.join('|');
+  return res.join("|");
 }
 
 function _voiceMapEntryString(voice: VoiceDefinition) {
@@ -106,28 +106,27 @@ function _voiceMapEntryString(voice: VoiceDefinition) {
   if (voice.octaveOffset != 0) {
     res.push(`o:${voice.octaveOffset}`);
   }
-  return `{${res.join(',')}}`;
+  return `{${res.join(",")}}`;
 }
 
 function _voiceMapEntryToVoiceDefinition(e: VoiceMapEntry): VoiceDefinition {
   return {
     program: e.i,
-    volumeOffset: (e.v != null) ? -(e.v) : 0,
+    volumeOffset: e.v != null ? -e.v : 0,
     octaveOffset: e.o || 0,
   };
 }
 
 export abstract class OPNToYM2413Converter extends VGMConverter {
-
   _userVoices: { [key: number]: number[] } = {
     0: [0x01, 0x01, 0x1c, 0x07, 0xf0, 0xd7, 0x00, 0x11],
-  }
+  };
 
   /** instrument data to voice and volue offset (attenuation) */
   _voiceDefMap: { [key: string]: VoiceDefinition } = {
     "000000000000000000000000000000000000000000000000000000000000": { program: 1, volumeOffset: 15, octaveOffset: 0 },
   };
-  _voiceInfoMap: { [key: string]: { opnVoice: OPNVoice, channels: Set<number> } } = {};
+  _voiceInfoMap: { [key: string]: { opnVoice: OPNVoice; channels: Set<number> } } = {};
 
   _autoMap = true;
 
@@ -137,7 +136,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     { hash: "", ...fallback_voice },
     { hash: "", ...fallback_voice },
     { hash: "", ...fallback_voice },
-    { hash: "", ...fallback_voice }
+    { hash: "", ...fallback_voice },
   ];
 
   _div = 0;
@@ -149,7 +148,11 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
   _rkeyFlags = [0, 0, 0, 0, 0, 0];
   _rVolumes = { hh: 15, cym: 15, tom: 15, sd: 15, bd: 15 };
 
-  constructor(from: ChipInfo, to: ChipInfo, public opts: any) {
+  constructor(
+    from: ChipInfo,
+    to: ChipInfo,
+    public opts: any,
+  ) {
     super(from, to);
     if (this.opts.voiceTable && this.opts.voiceTable.opn2opll) {
       const { opn2opll } = this.opts.voiceTable;
@@ -170,9 +173,9 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
-    const cmd = this.from.index ? 0xa1 : 0x51;
+    const targetId = this.from.index ? VGMWriteDataTargetId.ym2413_2 : VGMWriteDataTargetId.ym2413;
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd, index, port: 0, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId, index, port: 0, addr, data }), optimize);
   }
 
   _identifyVoice(ch: number) {
@@ -181,16 +184,40 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     const regs = this._regs[port];
 
     const rawVoice = [
-      regs[0x30 + nch], regs[0x34 + nch], regs[0x38 + nch], regs[0x3c + nch],
-      regs[0x40 + nch], regs[0x44 + nch], regs[0x48 + nch], regs[0x4c + nch],
-      regs[0x50 + nch], regs[0x54 + nch], regs[0x58 + nch], regs[0x5c + nch],
-      regs[0x60 + nch], regs[0x64 + nch], regs[0x68 + nch], regs[0x6c + nch],
-      regs[0x70 + nch], regs[0x74 + nch], regs[0x78 + nch], regs[0x7c + nch],
-      regs[0x80 + nch], regs[0x84 + nch], regs[0x88 + nch], regs[0x8c + nch],
-      regs[0x90 + nch], regs[0x94 + nch], regs[0x98 + nch], regs[0x9c + nch],
-      (regs[0xb0 + nch] & 0x3f), (regs[0xb4 + nch] & 0x37)
+      regs[0x30 + nch],
+      regs[0x34 + nch],
+      regs[0x38 + nch],
+      regs[0x3c + nch],
+      regs[0x40 + nch],
+      regs[0x44 + nch],
+      regs[0x48 + nch],
+      regs[0x4c + nch],
+      regs[0x50 + nch],
+      regs[0x54 + nch],
+      regs[0x58 + nch],
+      regs[0x5c + nch],
+      regs[0x60 + nch],
+      regs[0x64 + nch],
+      regs[0x68 + nch],
+      regs[0x6c + nch],
+      regs[0x70 + nch],
+      regs[0x74 + nch],
+      regs[0x78 + nch],
+      regs[0x7c + nch],
+      regs[0x80 + nch],
+      regs[0x84 + nch],
+      regs[0x88 + nch],
+      regs[0x8c + nch],
+      regs[0x90 + nch],
+      regs[0x94 + nch],
+      regs[0x98 + nch],
+      regs[0x9c + nch],
+      regs[0xb0 + nch] & 0x3f,
+      regs[0xb4 + nch] & 0x37,
     ];
-    const hash = _normalizeTotalLevel(rawVoice).map(e => ("0" + e.toString(16)).slice(-2)).join("");
+    const hash = _normalizeTotalLevel(rawVoice)
+      .map((e) => ("0" + e.toString(16)).slice(-2))
+      .join("");
     const prevHash = this._currentVoice[ch].hash;
 
     if (hash != prevHash) {
@@ -247,7 +274,6 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       const v = this._userVoices[program] || this._userVoices[0];
       for (let i = 0; i < v.length; i++) {
         this._y(i, v[i]);
-
       }
       const d = Math.min(15, Math.max(0, vv));
       this._y(0x30 + ch, d);
@@ -291,7 +317,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
         const nch = cmd.data & 3;
         if (nch !== 3) {
           const ch = nch + (cmd.data & 4 ? 3 : 0);
-          const key = (cmd.data >> 4) != 0 ? 1 : 0;
+          const key = cmd.data >> 4 != 0 ? 1 : 0;
           if (key != this._keyFlags[ch]) {
             if (key) {
               this._identifyVoice(ch);
@@ -302,11 +328,20 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
 
           if (program >= MAX_VOICES) {
             if (key) {
-              this._rkeyFlags[ch] = (program >> 10);
+              this._rkeyFlags[ch] = program >> 10;
             } else {
               this._rkeyFlags[ch] = 0;
             }
-            this._y(14, 32 | this._rkeyFlags[0] | this._rkeyFlags[1] | this._rkeyFlags[2] | this._rkeyFlags[3] | this._rkeyFlags[4] | this._rkeyFlags[5]);
+            this._y(
+              14,
+              32 |
+                this._rkeyFlags[0] |
+                this._rkeyFlags[1] |
+                this._rkeyFlags[2] |
+                this._rkeyFlags[3] |
+                this._rkeyFlags[4] |
+                this._rkeyFlags[5],
+            );
           }
 
           const blk = this._blkFnums[ch] >> 9;
@@ -322,7 +357,8 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       }
     }
 
-    if (0x40 <= adr && adr <= 0x4f) { // Total Level
+    if (0x40 <= adr && adr <= 0x4f) {
+      // Total Level
       const nch = adr & 3;
       if (nch !== 3) {
         this._updateInstVol(cmd.port, nch);
@@ -336,7 +372,7 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
       const ah = 0xa4 + nch;
       const fnum = (((regs[ah] & 7) << 8) | regs[al]) >> 2;
       const { hash, program, octaveOffset } = this._currentVoice[ch];
-      const blk = ((regs[ah] >> 3) & 7);
+      const blk = (regs[ah] >> 3) & 7;
       const blk_o = Math.min(7, Math.max(0, octaveOffset + blk));
       const key = program >= 1024 ? 0 : this._keyFlags[ch];
       const dl = fnum & 0xff;
@@ -356,11 +392,11 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
     // select FM 6-ch mode
     this._y(14, 32);
     // set rhythm freq
-    const goalClock = this.to.relativeClock ? (this.from.clock * this.to.clock) : (this.to.clock || 3579545);
+    const goalClock = this.to.relativeClock ? this.from.clock * this.to.clock : this.to.clock || 3579545;
     const ratio = 3579545 / goalClock;
     this._y(0x16, 0x20 * ratio);
     this._y(0x17, 0x50 * ratio);
-    this._y(0x18, 0xC0 * ratio);
+    this._y(0x18, 0xc0 * ratio);
     this._y(0x26, 0x05);
     this._y(0x27, 0x05);
     this._y(0x28, 0x01);

@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 
 export class AY8910ToYM2203Converter extends VGMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
@@ -8,7 +8,7 @@ export class AY8910ToYM2203Converter extends VGMConverter {
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === "ay8910" && cmd.index === this.from.index) {
-      return [cmd.copy({ cmd: 0x55 })];
+      return [cmd.copy({ targetId: VGMWriteDataTargetId.ym2203 })];
     }
     return [cmd];
   }
@@ -21,8 +21,8 @@ export class AY8910ToYM2608Converter extends VGMConverter {
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === "ay8910" && cmd.index === this.from.index) {
-      const id = cmd.index == 0 ? 0x56 : 0xa6;
-      return [cmd.copy({ cmd: id })];
+      const id = cmd.index == 0 ? VGMWriteDataTargetId.ym2608_p0 : VGMWriteDataTargetId.ym2608_2_p0;
+      return [cmd.copy({ targetId: id })];
     }
     return [cmd];
   }

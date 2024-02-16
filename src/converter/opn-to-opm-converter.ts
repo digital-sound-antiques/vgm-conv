@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPMNote, freqToOPMNote } from "./opm_freq";
 import { AY8910ToOPMConverter } from "./ay8910-to-opm-coverter";
@@ -22,9 +22,11 @@ export abstract class OPNToOPMConverter extends VGMConverter {
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
-    const cmd = 0x54;
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd, index, port: 0, addr, data }), optimize);
+    this._buf.push(
+      new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2151, index, port: 0, addr, data }),
+      optimize,
+    );
   }
 
   _fnumToFreq(fnum: number, blk: number): number {
@@ -105,7 +107,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
     }
     const lr = this._lrCache[ch];
     return ((lr & 1) << 1) | ((lr >> 1) & 1);
-  }  
+  }
 
   getInitialCommands(): Array<VGMCommand> {
     this._y(0x18, 0xc2); // LFO FREQ
@@ -131,7 +133,6 @@ export abstract class OPNToOPMConverter extends VGMConverter {
   }
 }
 
-
 export class YM2612ToOPMConverter extends OPNToOPMConverter {
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, { chip: "ym2151", index: from.index, clock: 1 / 2, relativeClock: true }, opts);
@@ -143,7 +144,7 @@ export class YM2203ToOPMConverter extends OPNToOPMConverter {
     const _to: ChipInfo = { chip: "ym2151", index: from.index, clock: 1, relativeClock: true };
     super(from, _to, opts);
     this._ssgConverter = new AY8910ToOPMConverter(from, _to, {
-      mainAttenuation: opts?.ssgAttenuation ?? 4,
+      mainAttenuation: opts?.ssgAttenuation ?? 0,
       whiteNoiseAttenuation: opts?.whiteNoiseAttenuation,
       squareWaveAttenuation: opts?.squareWaveAttenuation,
     });

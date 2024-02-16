@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 
 const voltbl = [15, 14, 14, 13, 12, 12, 11, 10, 10, 9, 8, 8, 7, 6, 6, 0];
@@ -23,19 +23,19 @@ export class SN76489ToOPNConverter extends VGMConverter {
   _fdiv = new Uint16Array(4);
   _ch = 0;
   _type = 0;
-  _command: number = 0;
+  _targetId: VGMWriteDataTargetId;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ym2203" ? 1 : 2, relativeClock: true });
     switch (to.chip) {
       case "ym2612":
-        this._command = from.index === 0 ? 0x52 : 0xa2;
+        this._targetId = from.index === 0 ? 0x52 : 0xa2;
         break;
       case "ym2203":
-        this._command = from.index === 0 ? 0x55 : 0xa5;
+        this._targetId = from.index === 0 ? 0x55 : 0xa5;
         break;
       case "ym2608":
-        this._command = from.index === 0 ? 0x56 : 0xa6;
+        this._targetId = from.index === 0 ? 0x56 : 0xa6;
         break;
       default:
         throw new Error(`Invalid chip: ${to.chip}.`);
@@ -45,7 +45,7 @@ export class SN76489ToOPNConverter extends VGMConverter {
   _y(a: number, d: number) {
     this._buf.push(
       new VGMWriteDataCommand({
-        cmd: this._command,
+        targetId: this._targetId,
         index: this.from.index,
         port: 0,
         addr: a,

@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
+import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { OPLLVoice, OPLLVoiceMap } from "ym-voice";
 
@@ -26,17 +26,17 @@ function _KLFix(kl: number) {
 
 type OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
 
-function type2cmd(type: OPLType) {
+function type2target(type: OPLType): VGMWriteDataTargetId {
   switch (type) {
     case "ym3526":
-      return 0x5b;
+      return VGMWriteDataTargetId.ym3526; // 0x5b;
     case "y8950":
-      return 0x5c;
+      return VGMWriteDataTargetId.y8950; // 0x5c;
     case "ymf262":
-      return 0x5e;
+      return VGMWriteDataTargetId.ymf262_p0; // 0x5e;
     case "ym3812":
     default:
-      return 0x5a;
+      return VGMWriteDataTargetId.ym3812; // 0x5a;
   }
 }
 
@@ -44,17 +44,17 @@ export class YM2413ToOPLConverter extends VGMConverter {
   _regs = new Uint8Array(256).fill(0);
   _buf = new VGMWriteDataCommandBuffer(256, 1);
   _type: OPLType;
-  _command: number;
+  _targetId: VGMWriteDataTargetId;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ymf262" ? 4 : 1, relativeClock: true });
     this._type = to.chip as OPLType;
-    this._command = type2cmd(this._type);
+    this._targetId = type2target(this._type);
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd: this._command, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId: this._targetId, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 
 abstract class SSGToAY8910Converter extends VGMConverter {
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
@@ -9,7 +9,7 @@ abstract class SSGToAY8910Converter extends VGMConverter {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === this.from.chip && cmd.index === this.from.index) {
       if (cmd.addr < 0x10) {
         if (convertSSG) {
-          return [cmd.copy({ cmd: 0xa0 })];
+          return [cmd.copy({ targetId: VGMWriteDataTargetId.ay8910 })];
         }
       } else {
         if (convertFM) {

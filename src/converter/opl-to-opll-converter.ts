@@ -1,6 +1,6 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
-import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
+import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
 import { OPLVoice } from "ym-voice";
 
 export class OPLToOPLLConverter extends VGMConverter {
@@ -40,7 +40,7 @@ export class OPLToOPLLConverter extends VGMConverter {
 
     _y(addr: number, data: number, optimize: boolean = true) {
         const index = this.from.index;
-        this._buf.push(new VGMWriteDataCommand({ cmd: 0x51, index, addr, data }), optimize);
+        this._buf.push(new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2413, index, addr, data }), optimize);
     }
 
     _getVoiceArr(ch: number) {

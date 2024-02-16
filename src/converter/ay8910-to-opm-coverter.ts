@@ -1,5 +1,5 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
+import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { freqToOPMNote } from "./opm_freq";
 
@@ -27,12 +27,12 @@ export class AY8910ToOPMConverter extends VGMConverter {
     
     const mainAttenuation = opts.mainAttenuation ?? 0;
     this._whiteNoiseAttenuation = mainAttenuation + (opts.whiteNoiseAttenuation ?? 68);
-    this._squareWaveAttenuation = mainAttenuation + (opts.squareWaveAttenuation ?? 0);
+    this._squareWaveAttenuation = mainAttenuation + (opts.squareWaveAttenuation ?? 8);
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd: 0x54, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2151, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

@@ -137,16 +137,16 @@ OPN (YM2203/YM2608/YM2612) to YM2413 OPTIONS
 AY8910 to YM2151 OPTIONS
 
   -D squareWaveAttenuation=n   Volume attenuation for the SSG square tone.      
-                               0<=n<=127. The default value is 0.               
+                               0<=n<=127. The default value is 8.               
   -D whiteNoiseAttenuation=n   Volume attenuation for the SSG noice. 0<=n<=127. 
                                The default value is 68.                         
 
 YM2203 to YM2151 OPTIONS
 
   -D ssgAttenuation=n          Volume attenuation for the SSG. 0<=n<=127. The   
-                               default value is 8.                              
+                               default value is 0.                              
   -D squareWaveAttenuation=n   Additional volume attenuation for the SSG square 
-                               tone. 0<=n<=127. The default value is 0.         
+                               tone. 0<=n<=127. The default value is 8.         
   -D whiteNoiseAttenuation=n   Additional volume attenuation for the SSG noice. 
                                0<=n<=127. The default value is 68.                                 
 

@@ -1,5 +1,5 @@
 import { ChipInfo, VGMClockConverter } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 
 const keyCodeToIndex = [0, 1, 2, 3, 3, 4, 5, 6, 6, 7, 8, 9, 9, 10, 11, 12];
@@ -22,9 +22,9 @@ export class OPMClockConverter extends VGMClockConverter {
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
-    const cmd = this.from.index ? 0xA4 : 0x54;
+    const targetId = this.from.index ? VGMWriteDataTargetId.ym2151_2 : VGMWriteDataTargetId.ym2151;
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd, index, port: 0, addr, data: data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId, index, port: 0, addr, data: data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

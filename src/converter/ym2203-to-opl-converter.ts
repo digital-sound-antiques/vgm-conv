@@ -1,21 +1,21 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
-import { VGMWriteDataCommand, VGMCommand } from "vgm-parser";
+import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
 import { OPLVoice, OPNVoice } from "ym-voice";
 
-type _OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
+type OPLType = "ym3812" | "y8950" | "ym3526" | "ymf262";
 
-function type2cmd(type: _OPLType) {
+function type2target(type: OPLType): VGMWriteDataTargetId {
   switch (type) {
     case "ym3526":
-      return 0x5b;
+      return VGMWriteDataTargetId.ym3526; // 0x5b;
     case "y8950":
-      return 0x5c;
+      return VGMWriteDataTargetId.y8950; // 0x5c;
     case "ymf262":
-      return 0x5e;
+      return VGMWriteDataTargetId.ymf262_p0; // 0x5e;
     case "ym3812":
     default:
-      return 0x5a;
+      return VGMWriteDataTargetId.ym3812; // 0x5a;
   }
 }
 
@@ -41,16 +41,16 @@ const muteVoice = new OPLVoice({
 export class YM2203ToOPLConverter extends VGMConverter {
   _regs = new Uint8Array(256);
   _buf = new VGMWriteDataCommandBuffer(256, 1);
-  _type: _OPLType;
-  _command: number;
+  _type: OPLType;
+  _targetId: VGMWriteDataTargetId;
   _keyStatus: Array<boolean> = [false, false, false, false, false, false]; // 0..2: FM1-3, 3..5: CH-3 SLOT
   _toClock: number;
   _ssgAttenuation: number = 0;
 
-  constructor(from: ChipInfo, to: ChipInfo, opts: { ssgAttenuation?: number}) {
+  constructor(from: ChipInfo, to: ChipInfo, opts: { ssgAttenuation?: number }) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ymf262" ? 4 : 1, relativeClock: true });
-    this._type = to.chip as _OPLType;
-    this._command = type2cmd(this._type);
+    this._type = to.chip as OPLType;
+    this._targetId = type2target(this._type);
     this._toClock = this.convertedChipInfo.clock;
     if (opts.ssgAttenuation != null) {
       this._ssgAttenuation = opts.ssgAttenuation;
@@ -59,7 +59,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ cmd: this._command, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ targetId: this._targetId, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {
@@ -127,7 +127,10 @@ export class YM2203ToOPLConverter extends VGMConverter {
     const n = ((8 << ch) & this._regs[0x7]) === 0;
     const v = this._regs[0x08 + ch];
     const vol = v & 0x10 ? 0 : v & 0xf;
-    const tl = Math.max(0, Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + this._ssgAttenuation));
+    const tl = Math.max(
+      0,
+      Math.min(63, [63, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0][vol & 0xf] + this._ssgAttenuation),
+    );
     const np = this._regs[0x06] & 0x1f;
     let ssgVoice: OPLVoice;
     if (t && !n) {
@@ -136,8 +139,8 @@ export class YM2203ToOPLConverter extends VGMConverter {
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
-        ]
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+        ],
       });
     } else if (!t && n) {
       ssgVoice = new OPLVoice({
@@ -145,8 +148,8 @@ export class YM2203ToOPLConverter extends VGMConverter {
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: np >> 1, kl: 0, tl: np >> 4, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: np >> 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
-        ]
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: np >> 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+        ],
       });
     } else if (t && n) {
       ssgVoice = new OPLVoice({
@@ -154,8 +157,8 @@ export class YM2203ToOPLConverter extends VGMConverter {
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
-        ]
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: tl, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+        ],
       });
     } else {
       ssgVoice = new OPLVoice({
@@ -163,8 +166,8 @@ export class YM2203ToOPLConverter extends VGMConverter {
         con: 0,
         slots: [
           { am: 0, pm: 0, eg: 1, kr: 0, ml: 2, kl: 0, tl: 27, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
-          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: 63, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 }
-        ]
+          { am: 0, pm: 0, eg: 1, kr: 0, ml: 1, kl: 0, tl: 63, ar: 15, dr: 0, sl: 0, rr: 15, ws: 0 },
+        ],
       });
     }
     this._setVoice(ch + 6, ssgVoice);
