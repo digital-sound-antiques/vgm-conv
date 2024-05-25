@@ -1,3 +1,6 @@
+## 0.13.8
+- Fixed the problem where AMS is always set zero in YM2413 to YM2608 conversion (Thanks to @kash1wa).
+
 ## 0.13.7
 - Fixed the problem where the OPM noise frequency was inverted.
 
