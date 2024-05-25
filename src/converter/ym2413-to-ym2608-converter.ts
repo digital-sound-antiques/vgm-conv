@@ -78,7 +78,10 @@ export class YM2413ToYM2608Converter extends VGMConverter {
     const opnVoice = voice.opn;
 
     this._y(port, 0xb0 + nch, (opnVoice.fb << 3) | opnVoice.con);
-    this._y(port, 0xb4 + nch, 0xc0 | (2 << 4) | opnVoice.pms);
+    // YM2413's amplitude LFO depth is 4.5dB.
+    // Set YM2608's AMS to 2 here for LFO depth to 5.9dB.
+    const ams = 2; 
+    this._y(port, 0xb4 + nch, 0xc0 | (ams << 4) | opnVoice.pms);
 
     for (let i = 0; i < 4; i++) {
       this._y(port, 0x30 + i * 4 + nch, (opnVoice.slots[i].dt << 4) | opnVoice.slots[i].ml);
