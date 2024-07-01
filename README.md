@@ -141,6 +141,18 @@ AY8910 to YM2151 OPTIONS
   -D whiteNoiseAttenuation=n   Volume attenuation for the SSG noice. 0<=n<=127. 
                                The default value is 68.                         
 
+YM2413 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS
+
+  -D opllVariant=ym2413|vrc7|ymf281b   Specify the YM2413 variant name. If not  
+                                       specified, it is detected from the VGM   
+                                       header.                                  
+
+YM2413 to YM2608 OPTIONS
+
+  -D opllVariant=ym2413|vrc7|ymf281b   Specify the YM2413 variant name. If not  
+                                       specified, it is detected from the VGM   
+                                       header.                                  
+
 YM2203 to YM2151 OPTIONS
 
   -D ssgAttenuation=n          Volume attenuation for the SSG. 0<=n<=127. The   
