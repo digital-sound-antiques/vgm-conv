@@ -1,5 +1,6 @@
 ## 0.14.0-beta.0
-- Fixed the [issue#85](https://github.com/digital-sound-antiques/vgm-conv/issues/85) where the LFO depth is not set when no rhythm register accesses in YM2413 to OPL conversion.
+
+- Fixed the [issue#85](https://github.com/digital-sound-antiques/vgm-conv/issues/85) where the LFO depth is not set when no rhythm register accesses in YM2413 to OPL conversion (Thanks to @ccacook98).
 - Added an option to specify a chip variant (ex. YM2413, VRC7 and YMF281B) in YM2413 to OPL/OPNA conversion.
 
 ## 0.13.8
