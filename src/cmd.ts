@@ -3,7 +3,7 @@ import commandLineUsage from "command-line-usage";
 import fs from "fs";
 import path from "path";
 import convertVGM from "./index";
-import { VGM } from "vgm-parser";
+import { ChipClockObject, ChipOrVariantName, VGM } from "vgm-parser";
 import { ChipInfo } from "./converter/vgm-converter";
 
 const optionDefinitions = [
@@ -154,6 +154,24 @@ const sections = [
     ],
   },
   {
+    header: "YM2413 to OPL (YM3812/Y8950/YM3526/YMF262) OPTIONS",
+    content: [
+      {
+        def: "{bold -D} opllVariant=ym2413|vrc7|ymf281b",
+        desc: `Specify the YM2413 variant name. If not specified, it is detected from the VGM header.`,
+      },
+    ],
+  },
+  {
+    header: "YM2413 to YM2608 OPTIONS",
+    content: [
+      {
+        def: "{bold -D} opllVariant=ym2413|vrc7|ymf281b",
+        desc: `Specify the YM2413 variant name. If not specified, it is detected from the VGM header.`,
+      },
+    ],
+  },
+  {
     header: "YM2203 to YM2151 OPTIONS",
     content: [
       {
@@ -274,6 +292,7 @@ const defineKeyTypeMap: { [key: string]: any } = {
   noisePitchMap: Uint8Array,
   channelAttenuationMap: Uint8Array,
   ssgAttenuation: Number,
+  opllVariant: ["ym2413", "vrc7", "ymf281b"],
 };
 
 function toArrayBuffer(b: Buffer) {
@@ -290,10 +309,10 @@ function parseValue(text: string): boolean | string | number | Array<any> {
   if (text === "false") {
     return false;
   }
-  if (/[0-9]+/.test(text)) {
+  if (/^[0-9]+$/.test(text)) {
     return parseInt(text);
   }
-  if (/[0-9]+\.[0-9]+/.test(text)) {
+  if (/^[0-9]+\.[0-9]+$/.test(text)) {
     return parseFloat(text);
   }
   return text;
@@ -391,11 +410,13 @@ function main(argv: string[]) {
       fromSubModule = fromCM[1];
     }
 
+    const fromCommonInfo = (vgm.chips as any)[fromChipName!] as ChipClockObject | null;
     const from = {
       index: 0,
       chip: fromChipName as any,
       subModule: fromSubModule,
-      clock: ((vgm.chips as any)[fromChipName!] || {}).clock || 0,
+      clock: fromCommonInfo?.clock ?? 0,
+      variantName: fromCommonInfo?.chipType?.name as ChipOrVariantName | null,
     };
 
     const toCM = (options.to || options.from).split(".");

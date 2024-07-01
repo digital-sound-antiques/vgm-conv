@@ -1,7 +1,8 @@
-import { VGMCommand, ChipName } from "vgm-parser";
+import { VGMCommand, ChipName, ChipOrVariantName } from "vgm-parser";
 
 export type ChipInfo = {
   chip: ChipName;
+  variantName?: ChipOrVariantName | null;
   subModule?: "fm" | "ssg" | "adpcm" | "dac" | string | null;
   index: number;
   clock: number;

@@ -22,6 +22,7 @@ import { OPLToOPL2Converter } from "./converter/opl-to-opl2-converter";
 import { OPLToOPLLConverter } from "./converter/opl-to-opll-converter";
 import { YM2203ToOPMConverter, YM2608ToOPMConverter, YM2612ToOPMConverter } from "./converter/opn-to-opm-converter";
 import { AY8910ToOPMConverter } from "./converter/ay8910-to-opm-coverter";
+import { OPLLVoiceMap } from "ym-voice";
 
 export function getClockConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMConverter | null {
   if (to.chip === "ym3812" || to.chip === "y8950" || to.chip === "ym3526" || to.chip === "ymf262") {
@@ -115,11 +116,12 @@ export function getChipConverter(from: ChipInfo, to: ChipInfo, opts: {}): VGMCon
   }
 
   if (from.chip === "ym2413") {
+    const optsEx = { opllVariant: from.variantName, ...opts };
     if (to.chip === "ym2608") {
-      return new YM2413ToYM2608Converter(from, to, opts);
+      return new YM2413ToYM2608Converter(from, to, optsEx);
     }
     if (to.chip === "ym3812" || to.chip === "y8950" || to.chip === "ym3526" || to.chip === "ymf262") {
-      return new YM2413ToOPLConverter(from, to, opts);
+      return new YM2413ToOPLConverter(from, to, optsEx);
     }
   }
   if (from.chip === "ay8910") {
@@ -237,6 +239,20 @@ export default function convertVGM(input: VGM, from: ChipInfo, to: ChipInfo, opt
   }
   chips[to.chip].clock = cur.clock;
 
-  console.error(`${from.chip}(${from.clock}Hz) => ${cur.chip}(${cur.clock}Hz)`);
+  let variantName: string | null = null;
+  if (from.chip == "ym2413") {
+    const opllVariant = opts.opllVariant ?? from.variantName;
+    if (opllVariant != "ym2413" && opllVariant != null) {
+      variantName = opllVariant;
+    }
+  }
+
+  let fromName = from.chip.toUpperCase();
+  if (variantName != null) {
+    fromName += `(as ${variantName.toUpperCase()})`;
+  }
+  const toName = cur.chip.toUpperCase();
+
+  console.error(`${fromName}@${from.clock}Hz => ${toName}@${cur.clock}Hz`);
   return vgm;
 }

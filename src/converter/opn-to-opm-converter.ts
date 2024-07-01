@@ -24,7 +24,7 @@ export abstract class OPNToOPMConverter extends VGMConverter {
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
     this._buf.push(
-      new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2151, index, port: 0, addr, data }),
+      new VGMWriteDataCommand({ target: VGMWriteDataTargetId.ym2151, index, port: 0, addr, data }),
       optimize,
     );
   }

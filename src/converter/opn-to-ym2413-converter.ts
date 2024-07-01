@@ -173,9 +173,9 @@ export abstract class OPNToYM2413Converter extends VGMConverter {
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
-    const targetId = this.from.index ? VGMWriteDataTargetId.ym2413_2 : VGMWriteDataTargetId.ym2413;
+    const target = this.from.index ? VGMWriteDataTargetId.ym2413_2 : VGMWriteDataTargetId.ym2413;
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId, index, port: 0, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target, index, port: 0, addr, data }), optimize);
   }
 
   _identifyVoice(ch: number) {

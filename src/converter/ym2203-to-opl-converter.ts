@@ -59,7 +59,7 @@ export class YM2203ToOPLConverter extends VGMConverter {
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId: this._targetId, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target: this._targetId, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

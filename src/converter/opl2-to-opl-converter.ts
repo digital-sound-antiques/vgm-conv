@@ -16,17 +16,17 @@ function type2cmd(type: _OPLType): VGMWriteDataTargetId {
 
 export class OPL2ToOPLConverter extends VGMConverter {
   _type: _OPLType;
-  _targetId: VGMWriteDataTargetId;
+  _target: VGMWriteDataTargetId;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, { chip: to.chip, index: from.index, clock: 1, relativeClock: true });
     this._type = to.chip as _OPLType;
-    this._targetId = type2cmd(this._type);
+    this._target = type2cmd(this._type);
   }
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     if (cmd instanceof VGMWriteDataCommand && (cmd.chip === "ym3812") && cmd.index === this.from.index) {
-      return [cmd.copy({ targetId: this._targetId })];
+      return [cmd.copy({ target: this._target })];
     }
     return [cmd];
   }

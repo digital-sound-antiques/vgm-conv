@@ -32,7 +32,7 @@ export class AY8910ToOPMConverter extends VGMConverter {
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2151, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target: VGMWriteDataTargetId.ym2151, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

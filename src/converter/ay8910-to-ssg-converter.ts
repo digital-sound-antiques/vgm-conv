@@ -8,7 +8,7 @@ export class AY8910ToYM2203Converter extends VGMConverter {
 
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === "ay8910" && cmd.index === this.from.index) {
-      return [cmd.copy({ targetId: VGMWriteDataTargetId.ym2203 })];
+      return [cmd.copy({ target: VGMWriteDataTargetId.ym2203 })];
     }
     return [cmd];
   }
@@ -22,7 +22,7 @@ export class AY8910ToYM2608Converter extends VGMConverter {
   convertCommand(cmd: VGMCommand): Array<VGMCommand> {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === "ay8910" && cmd.index === this.from.index) {
       const id = cmd.index == 0 ? VGMWriteDataTargetId.ym2608_p0 : VGMWriteDataTargetId.ym2608_2_p0;
-      return [cmd.copy({ targetId: id })];
+      return [cmd.copy({ target: id })];
     }
     return [cmd];
   }

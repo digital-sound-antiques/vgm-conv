@@ -1,7 +1,7 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
 import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
-import { OPLLVoice, OPLLVoiceMap } from "ym-voice";
+import { OPLLVoice, OPLLVoiceMap, OPLLVoiceVariant, getOPLLRomVoices } from "ym-voice";
 
 function getModOffset(ch: number) {
   return 8 * Math.floor(ch / 3) + (ch % 3);
@@ -45,20 +45,24 @@ export class YM2413ToOPLConverter extends VGMConverter {
   _buf = new VGMWriteDataCommandBuffer(256, 1);
   _type: OPLType;
   _targetId: VGMWriteDataTargetId;
+  _romVoices: OPLLVoice[];
+  _lfoDepth = 3;
 
-  constructor(from: ChipInfo, to: ChipInfo, opts: any) {
+  constructor(from: ChipInfo, to: ChipInfo, opts: { opllVariant?: OPLLVoiceVariant | string | null }) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ymf262" ? 4 : 1, relativeClock: true });
     this._type = to.chip as OPLType;
     this._targetId = type2target(this._type);
+    this._romVoices = getOPLLRomVoices(opts?.opllVariant);
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId: this._targetId, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target: this._targetId, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {
     this._y(0x01, 0x20); // YM3812 mode
+    this._y(0xbd, this._lfoDepth << 6); // LFO depth
     return this._buf.commit();
   }
 
@@ -70,42 +74,42 @@ export class YM2413ToOPLConverter extends VGMConverter {
     [
       {
         a: 0x20 + modOffset,
-        d: (mod.am << 7) | (mod.pm << 6) | (mod.eg << 5) | (mod.kr << 4) | mod.ml
+        d: (mod.am << 7) | (mod.pm << 6) | (mod.eg << 5) | (mod.kr << 4) | mod.ml,
       },
       {
         a: 0x20 + carOffset,
-        d: (car.am << 7) | (car.pm << 6) | (car.eg << 5) | (car.kr << 4) | car.ml
+        d: (car.am << 7) | (car.pm << 6) | (car.eg << 5) | (car.kr << 4) | car.ml,
       },
       {
         a: 0x40 + modOffset,
-        d: (_KLFix(mod.kl) << 6) | (modVolume ? modVolume : mod.tl)
+        d: (_KLFix(mod.kl) << 6) | (modVolume ? modVolume : mod.tl),
       },
       {
         a: 0x40 + carOffset,
-        d: (_KLFix(car.kl) << 6) | (carVolume ? carVolume : car.tl)
+        d: (_KLFix(car.kl) << 6) | (carVolume ? carVolume : car.tl),
       },
       {
         a: 0x60 + modOffset,
-        d: (_R(mod.ar) << 4) | _R(mod.dr)
+        d: (_R(mod.ar) << 4) | _R(mod.dr),
       },
       {
         a: 0x60 + carOffset,
-        d: (_R(car.ar) << 4) | _R(car.dr)
+        d: (_R(car.ar) << 4) | _R(car.dr),
       },
       {
         a: 0x80 + modOffset,
-        d: (mod.sl << 4) | (!mod.eg ? _R(mod.rr) : 0)
+        d: (mod.sl << 4) | (!mod.eg ? _R(mod.rr) : 0),
       },
       {
         a: 0x80 + carOffset,
-        d: (car.sl << 4) | _R(car.eg || key ? _R(car.rr) : _R(6))
+        d: (car.sl << 4) | _R(car.eg || key ? _R(car.rr) : _R(6)),
       },
       {
         a: 0xc0 + ch,
-        d: (this._type === "ymf262" ? 0xf0 : 0) | (v.fb << 1)
+        d: (this._type === "ymf262" ? 0xf0 : 0) | (v.fb << 1),
       },
       { a: 0xe0 + modOffset, d: mod.ws ? 1 : 0 },
-      { a: 0xe0 + carOffset, d: car.ws ? 1 : 0 }
+      { a: 0xe0 + carOffset, d: car.ws ? 1 : 0 },
     ].forEach(({ a, d }) => {
       this._y(a, d);
     });
@@ -117,7 +121,7 @@ export class YM2413ToOPLConverter extends VGMConverter {
     const d = this._regs[0x30 + ch];
     const inst = (d & 0xf0) >> 4;
     const volume = d & 0xf;
-    const voice = inst === 0 ? OPLLVoice.decode(this._regs) : OPLLVoiceMap[inst];
+    const voice = inst === 0 ? OPLLVoice.decode(this._regs) : this._romVoices[inst];
     const key = this._regs[0x20 + ch] & 0x10 ? true : false;
 
     const toTL = (vol: number, off: number) => Math.max((vol << 2) - off, 0);
@@ -125,13 +129,13 @@ export class YM2413ToOPLConverter extends VGMConverter {
     if (this._rflag && 6 <= ch) {
       switch (ch) {
         case 6:
-          this._writeVoice(6, OPLLVoiceMap[16], null, toTL(volume, 0), key);
+          this._writeVoice(6, this._romVoices[16], null, toTL(volume, 0), key);
           break;
         case 7:
-          this._writeVoice(7, OPLLVoiceMap[17], toTL(inst, 0), toTL(volume, 0), key);
+          this._writeVoice(7, this._romVoices[17], toTL(inst, 0), toTL(volume, 0), key);
           break;
         case 8:
-          this._writeVoice(8, OPLLVoiceMap[18], toTL(inst, 0), toTL(volume, 0), key);
+          this._writeVoice(8, this._romVoices[18], toTL(inst, 0), toTL(volume, 0), key);
           break;
       }
     } else {
@@ -159,7 +163,7 @@ export class YM2413ToOPLConverter extends VGMConverter {
       } else {
         this._rflag = d & 0x20 ? true : false;
       }
-      this._y(0xbd, 0xc0 | (d & 0x3f));
+      this._y(0xbd, (this._lfoDepth << 6) | (d & 0x3f));
     } else if (0x10 <= a && a <= 0x18) {
       const ch = a & 0xf;
       this._y(0xb0 + ch, ((this._regs[0x20 + ch] & 0x1f) << 1) | ((d & 0x80) >> 7));

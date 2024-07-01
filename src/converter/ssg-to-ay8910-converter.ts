@@ -9,7 +9,7 @@ abstract class SSGToAY8910Converter extends VGMConverter {
     if (cmd instanceof VGMWriteDataCommand && cmd.chip === this.from.chip && cmd.index === this.from.index) {
       if (cmd.addr < 0x10) {
         if (convertSSG) {
-          return [cmd.copy({ targetId: VGMWriteDataTargetId.ay8910 })];
+          return [cmd.copy({ target: VGMWriteDataTargetId.ay8910 })];
         }
       } else {
         if (convertFM) {

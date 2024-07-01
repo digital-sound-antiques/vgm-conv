@@ -1,40 +1,53 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId } from "vgm-parser";
+import { VGMCommand, VGMWriteDataCommand, VGMWriteDataTargetId, YM2413VariantName } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
-import { OPNSlotParam, OPLLVoiceMap, OPLLVoice } from "ym-voice";
+import { OPNSlotParam, OPLLVoiceMap, OPLLVoice, OPNVoice, getOPLLRomVoices, OPLLVoiceVariant } from "ym-voice";
 
 /* level key scaling table */
 const KSLTable = [0, 24, 32, 37, 40, 43, 45, 47, 48, 50, 51, 52, 53, 54, 55, 56];
 
-const ROM_VOICES = OPLLVoiceMap.map((e) => {
-  return { opll: e, opn: e.toOPN() };
-});
 
 export class YM2413ToYM2608Converter extends VGMConverter {
-  constructor(from: ChipInfo, to: ChipInfo, opts: { useTestMode?: boolean; decimation?: number }) {
+  constructor(
+    from: ChipInfo,
+    to: ChipInfo,
+    opts: {
+      useTestMode?: boolean | null;
+      decimation?: number | null;
+      opllVariant?: OPLLVoiceVariant | string | null;
+    },
+  ) {
     super(from, { chip: "ym2608", index: from.index, clock: 2, relativeClock: true });
+    this._romVoices = getOPLLRomVoices(opts?.opllVariant).map((e) => {
+      return { opll: e, opn: e.toOPN() };
+    });
+    this._userVoice = this._romVoices[0];
+    this._voiceMap = [
+      this._romVoices[0],
+      this._romVoices[0],
+      this._romVoices[0],
+      this._romVoices[0],
+      this._romVoices[0],
+      this._romVoices[0],
+    ];
   }
+
   _regs = new Uint8Array(256).fill(0);
   _buf = new VGMWriteDataCommandBuffer(256, 2);
-  _userVoice = { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() };
-  _voiceMap = [
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-    { opll: OPLLVoiceMap[0], opn: OPLLVoiceMap[0].toOPN() },
-  ];
+
+  _userVoice: { opll: OPLLVoice; opn: OPNVoice };
+  _romVoices: { opll: OPLLVoice; opn: OPNVoice }[];
+  _voiceMap: { opll: OPLLVoice; opn: OPNVoice }[];
 
   _y(port: number, addr: number, data: number, optimize: boolean = true) {
-    let targetId;
+    let target;
     if (port == 0) {
-      targetId = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p0 : VGMWriteDataTargetId.ym2608_2_p0;
+      target = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p0 : VGMWriteDataTargetId.ym2608_2_p0;
     } else {
-      targetId = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p1 : VGMWriteDataTargetId.ym2608_2_p1;
+      target = this.from.index == 0 ? VGMWriteDataTargetId.ym2608_p1 : VGMWriteDataTargetId.ym2608_2_p1;
     }
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId, index, port, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target, index, port, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {
@@ -72,7 +85,7 @@ export class YM2413ToYM2608Converter extends VGMConverter {
     const volume = iv & 15;
     const ch = port * 3 + nch;
 
-    const voice = inst === 0 ? this._userVoice : ROM_VOICES[inst];
+    const voice = inst === 0 ? this._userVoice : this._romVoices[inst];
     this._voiceMap[ch] = voice;
 
     const opnVoice = voice.opn;
@@ -80,7 +93,7 @@ export class YM2413ToYM2608Converter extends VGMConverter {
     this._y(port, 0xb0 + nch, (opnVoice.fb << 3) | opnVoice.con);
     // YM2413's amplitude LFO depth is 4.5dB.
     // Set YM2608's AMS to 2 here for LFO depth to 5.9dB.
-    const ams = 2; 
+    const ams = 2;
     this._y(port, 0xb4 + nch, 0xc0 | (ams << 4) | opnVoice.pms);
 
     for (let i = 0; i < 4; i++) {

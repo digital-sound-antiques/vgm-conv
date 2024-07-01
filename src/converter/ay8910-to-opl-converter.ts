@@ -26,19 +26,19 @@ export class AY8910ToOPLConverter extends VGMConverter {
   _regs = new Uint8Array(256).fill(0);
   _buf = new VGMWriteDataCommandBuffer(256, 1);
   _type: OPLType;
-  _targetId: VGMWriteDataTargetId;
+  _target: VGMWriteDataTargetId;
   _oplClock: number;
 
   constructor(from: ChipInfo, to: ChipInfo, opts: any) {
     super(from, { chip: to.chip, index: from.index, clock: to.chip === "ymf262" ? 8 : 2, relativeClock: true });
     this._type = to.chip as OPLType;
-    this._targetId = type2target(this._type);
+    this._target = type2target(this._type);
     this._oplClock = this.convertedChipInfo.clock;
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId: this._targetId, index, addr, data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target: this._target, index, addr, data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {

@@ -72,7 +72,7 @@ export class SN76489ToAY8910Converter extends VGMConverter {
     const addr = index === 0 ? a : a | 0x80;
     this._buf.push(
       new VGMWriteDataCommand({
-        targetId: VGMWriteDataTargetId.ay8910,
+        target: VGMWriteDataTargetId.ay8910,
         index,
         port: 0,
         addr,

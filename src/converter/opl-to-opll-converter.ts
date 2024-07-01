@@ -40,7 +40,7 @@ export class OPLToOPLLConverter extends VGMConverter {
 
     _y(addr: number, data: number, optimize: boolean = true) {
         const index = this.from.index;
-        this._buf.push(new VGMWriteDataCommand({ targetId: VGMWriteDataTargetId.ym2413, index, addr, data }), optimize);
+        this._buf.push(new VGMWriteDataCommand({ target: VGMWriteDataTargetId.ym2413, index, addr, data }), optimize);
     }
 
     _getVoiceArr(ch: number) {

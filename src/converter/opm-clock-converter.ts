@@ -22,9 +22,9 @@ export class OPMClockConverter extends VGMClockConverter {
   }
 
   _y(addr: number, data: number, optimize: boolean = true) {
-    const targetId = this.from.index ? VGMWriteDataTargetId.ym2151_2 : VGMWriteDataTargetId.ym2151;
+    const target = this.from.index ? VGMWriteDataTargetId.ym2151_2 : VGMWriteDataTargetId.ym2151;
     const index = this.from.index;
-    this._buf.push(new VGMWriteDataCommand({ targetId, index, port: 0, addr, data: data }), optimize);
+    this._buf.push(new VGMWriteDataCommand({ target, index, port: 0, addr, data: data }), optimize);
   }
 
   getInitialCommands(): Array<VGMCommand> {
