@@ -145,11 +145,11 @@ const sections = [
     content: [
       {
         def: "{bold -D} squareWaveAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG square tone. 0<=n<=127. The default value is 0.`,
+        desc: `Volume attenuation for the SSG square tone. 0<=n<=127. The default value is 8.`,
       },
       {
         def: "{bold -D} whiteNoiseAttenuation={underline n}",
-        desc: `Volume attenuation for the SSG noice. 0<=n<=127. The default value is 68.`,
+        desc: `Volume attenuation for the SSG noice. 0<=n<=127. The default value is 0.`,
       },
     ],
   },

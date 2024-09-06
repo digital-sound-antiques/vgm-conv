@@ -1,9 +1,10 @@
 import { VGMConverter, ChipInfo } from "./vgm-converter";
-import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId } from "vgm-parser";
+import { VGMWriteDataCommand, VGMCommand, VGMWriteDataTargetId, VGMWaitCommand } from "vgm-parser";
 import VGMWriteDataCommandBuffer from "./vgm-write-data-buffer";
 import { freqToOPMNote } from "./opm_freq";
 
 const VOL_TO_TL = [127, 62, 56, 52, 46, 42, 36, 32, 28, 24, 20, 16, 12, 8, 4, 0];
+const N_VOL_TO_TL = [127, 126, 125, 124, 123, 122, 121, 120, 116, 112, 105, 96, 82, 64, 37, 0];
 
 const OPM_CH_BASE = 4;
 
@@ -24,9 +25,9 @@ export class AY8910ToOPMConverter extends VGMConverter {
     super(from, to);
     this._fdiv = from.chip == "ay8910" ? 2 : 4;
     this._clockRatio = 3579545 / this.convertedChipInfo.clock;
-    
+
     const mainAttenuation = opts.mainAttenuation ?? 0;
-    this._whiteNoiseAttenuation = mainAttenuation + (opts.whiteNoiseAttenuation ?? 68);
+    this._whiteNoiseAttenuation = mainAttenuation + (opts.whiteNoiseAttenuation ?? 0);
     this._squareWaveAttenuation = mainAttenuation + (opts.squareWaveAttenuation ?? 8);
   }
 
@@ -87,8 +88,8 @@ export class AY8910ToOPMConverter extends VGMConverter {
         nVol = Math.max(nVol, this._regs[0x8 + i] & 0xf);
       }
     }
-    this._y(0x0f, 0x80 | 0x1f - this._nfreq);
-    this._y(0x7f, Math.min(127, VOL_TO_TL[nVol] + this._whiteNoiseAttenuation)); // SLOT32
+    this._y(0x0f, 0x80 | (0x1f - this._nfreq));
+    this._y(0x7f, Math.min(127, N_VOL_TO_TL[nVol] + this._whiteNoiseAttenuation)); // SLOT32
   }
 
   _updateTone(ch: number) {
@@ -119,7 +120,7 @@ export class AY8910ToOPMConverter extends VGMConverter {
       this._updateTone(addr - 0x08);
       this._updateNoise();
     } else if (addr === 0x06) {
-      this._nfreq = (this._regs[0x06] & 0x1f);
+      this._nfreq = this._regs[0x06] & 0x1f;
       this._updateNoise();
     } else if (addr === 0x07) {
       this._updateTone(0);

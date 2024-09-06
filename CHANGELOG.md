@@ -1,3 +1,7 @@
+## 0.14.1
+
+- Fixed the noise attenuation table in PSG to OPM conversion.
+
 ## 0.14.0-beta.0
 
 - Fixed the [issue#85](https://github.com/digital-sound-antiques/vgm-conv/issues/85) where the LFO depth is not set when no rhythm register accesses in YM2413 to OPL conversion (Thanks to @ccacook98).

@@ -160,7 +160,7 @@ YM2203 to YM2151 OPTIONS
   -D squareWaveAttenuation=n   Additional volume attenuation for the SSG square 
                                tone. 0<=n<=127. The default value is 8.         
   -D whiteNoiseAttenuation=n   Additional volume attenuation for the SSG noice. 
-                               0<=n<=127. The default value is 68.                                 
+                               0<=n<=127. The default value is 0.                            
 
 YM2612 to YM2413 OPTIONS
 
